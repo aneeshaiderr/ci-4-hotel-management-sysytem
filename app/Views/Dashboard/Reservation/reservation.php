@@ -28,7 +28,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Hotel Code</th>
-                            <th>Secret</th>
+                            <th>Email</th>
                             <th>Hotel Name</th>
                             <th>Room ID</th>
                             <th>Discount Name</th>
@@ -44,7 +44,7 @@
                                 <tr>
                                     <td><?= esc($res['hotel_code'] ?? '') ?></td>
 
-                                    <td><?= esc($res['secret'] ?? '') ?></td>
+                                    <td><?= esc($res['email'] ?? '') ?></td>
                                     <td><?= esc($res['hotel_name'] ?? '') ?></td>
                                     <td><?= esc($res['room_id'] ?? '') ?></td>
                                     <td><?= esc($res['discount_name'] ?? '') ?></td>
@@ -62,7 +62,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-1">
-                                            <a href="<?= base_url('reservation/edit/' . ($res['id'] ?? 0)) ?>"
+                                            <a href="<?= base_url('reservation/edit/' . ($res['id'] )) ?>"
                                                class="btn btn-sm btn-primary py-1 px-3">
                                                 View
                                             </a>

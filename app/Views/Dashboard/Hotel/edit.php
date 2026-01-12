@@ -4,11 +4,11 @@
       <div class="mx-auto max-w-4xl py-7 px-7">
         <h5 class="fw-bold mb-4">Edit Hotel</h5>
 
-        <!-- Form: Use POST + hidden _method PATCH for CI4 -->
-        <form method="POST" action="<?= site_url('hotel/update') ?>">
+        <!-- AJAX-friendly form -->
+        <form id="editHotelForm">
           <?= csrf_field() ?> <!-- CI4 CSRF token -->
 
-          <!-- Hidden fields -->
+          <!-- Hidden ID -->
           <input type="hidden" name="id" value="<?= esc($hotel['id']) ?>">
 
           <!-- Hotel Name -->
@@ -35,8 +35,9 @@
 
           <!-- Buttons -->
           <div class="mt-6 d-flex justify-content-end gap-2">
-            <a href="<?= site_url('hotel') ?>" class="btn btn-secondary">Cancel</a>
+            <a href="<?= base_url('hotel') ?>" class="btn btn-secondary">Cancel</a>
             <button type="submit"
+              id="updateBtn"
               class="btn btn-success"
               style="background-color:#16a34a; color:white;"
               onmouseover="this.style.backgroundColor='#15803d'"
@@ -49,3 +50,58 @@
     </main>
   </div>
 </div>
+
+<script>
+$(function () {
+
+    $('#editHotelForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const form = this;
+        const formData = $(form).serialize();
+
+        console.log(formData);
+
+        $.ajax({
+            url: "<?= base_url('hotel/update') ?>",
+            type: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+
+            beforeSend: function () {
+                $(form).find('button[type="submit"]')
+                       .prop('disabled', true)
+                       .text('Updating...');
+            },
+
+            success: function (response) {
+
+                if (response.status === 'success') {
+                    alert(response.message || 'Hotel updated successfully!');
+
+
+                    window.location.href = "<?= base_url('hotel') ?>";
+
+                } else {
+                    alert(response.message || 'Update failed!');
+                }
+            },
+
+            error: function (xhr) {
+                alert('Server error!');
+                console.log(xhr.responseText);
+            },
+
+            complete: function () {
+                $(form).find('button[type="submit"]')
+                       .prop('disabled', false)
+                       .text('Update');
+            }
+        });
+    });
+
+});
+</script>

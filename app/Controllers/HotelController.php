@@ -33,17 +33,16 @@ class HotelController extends BaseController
     /**
      * Store new hotel
      */
-   public function store()
+public function store()
 {
-
     $request = Services::request();
     $session = Services::session();
 
-
-
-
     if ($request->getMethod() == 'post') {
-        return redirect()->to(base_url('hotel'));
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request method'
+        ]);
     }
 
     $data = [
@@ -54,19 +53,25 @@ class HotelController extends BaseController
 
     try {
         $this->hotelModel->createHotel($data);
-        $session->setFlashdata('success', 'Hotel created successfully!');
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Hotel created successfully!'
+        ]);
+
     } catch (\Exception $e) {
-
+        $errorMessage = 'Something went wrong!';
         if (strpos($e->getMessage(), '1062') !== false) {
-            $session->setFlashdata('error', 'Hotel already exists!');
-        } else {
-            $session->setFlashdata('error', 'Something went wrong!');
+            $errorMessage = 'Hotel already exists!';
         }
+
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => $errorMessage
+        ]);
     }
-
-
-    return redirect()->to(base_url('hotel'));
 }
+
     /**
      * Show hotel detail for edit
      */
@@ -93,30 +98,39 @@ class HotelController extends BaseController
     /**
      * Update existing hotel
      */
-    public function update()
-    {
-        $request = Services::request();
+   public function update()
+{
+    $request = Services::request();
 
-        if ($request->getMethod() !== 'post') {
-            $id = $request->getPost('id');
-
-            $data = [
-                'hotel_name' => $request->getPost('hotel_name'),
-                'address'    => $request->getPost('address'),
-                'contact_no' => $request->getPost('contact_no'),
-            ];
-
-            try {
-                $this->hotelModel->updateHotel($id, $data);
-                $this->session->setFlashdata('success', 'Hotel updated successfully!');
-            } catch (\Exception $e) {
-                $this->session->setFlashdata('error', 'Something went wrong!');
-            }
-
-            return redirect()->to('/hotel');
-        }
+    if (!$request->isAJAX() || $request->getMethod() == 'post') {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request method'
+        ]);
     }
 
+    $id = $request->getPost('id');
+    $data = [
+        'hotel_name' => $request->getPost('hotel_name'),
+        'address'    => $request->getPost('address'),
+        'contact_no' => $request->getPost('contact_no')
+    ];
+
+    try {
+        $this->hotelModel->updateHotel($id, $data);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Hotel updated successfully!'
+        ]);
+
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
+    }
+}
     /**
      * Soft delete hotel
      */

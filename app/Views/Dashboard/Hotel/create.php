@@ -1,5 +1,3 @@
-
-
 <div class="main-content d-flex flex-column min-vh-100">
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -9,7 +7,8 @@
         <div class="card card-custom w-100">
             <div class="card-body">
 
-                <form action="<?= base_url('hotel/store') ?>" method="POST">
+                <!-- Form without action -->
+                <form id="createHotelForm" method="POST">
                     <?= csrf_field() ?>
 
                     <div class="mb-3">
@@ -27,10 +26,55 @@
                         <input type="text" name="contact_no" class="form-control" placeholder="Enter contact number" required>
                     </div>
 
-                    <button type="submit" class="btn btn-success">Save Hotel</button>
+                    <button type="submit" id="saveHotelBtn" class="btn btn-success">Save Hotel</button>
                     <a href="<?= base_url('hotel') ?>" class="btn btn-secondary btn-sm">← Back to List</a>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+
+
+<script>
+$(function () {
+
+    $('#createHotelForm').on('submit', function (e) {
+        e.preventDefault();
+
+        console.log($(this).serialize());
+        $.ajax({
+            url: "<?= base_url('hotel/store') ?>",
+              type: "POST",
+        data: $(this).serialize(),
+            dataType: "json",
+
+            beforeSend: function () {
+                $('#saveHotelBtn').prop('disabled', true).text('Saving...');
+            },
+
+            success: function (response) {
+                if (response.status === 'success') {
+                    alert(response.message);
+
+
+                    $('#createHotelForm')[0].reset();
+                } else {
+                    alert(response.message || 'Failed to save hotel');
+                }
+            },
+
+            error: function (xhr) {
+                alert('Server error!');
+                console.log(xhr.responseText);
+            },
+
+            complete: function () {
+                $('#saveHotelBtn').prop('disabled', false).text('Save Hotel');
+            }
+        });
+    });
+
+});
+
+</script>

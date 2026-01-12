@@ -65,7 +65,7 @@ class ServiceModel extends Model
     {
         return $this->select('id, service_name, price, status')
                     ->where('deleted_at', null)
-                    ->orderBy('id', 'DESC')
+                    ->orderBy('id')
                     ->findAll();
     }
 
@@ -98,11 +98,17 @@ class ServiceModel extends Model
     }
 
 
-    public function softDeleteService($id)
-    {
-        return $this->delete($id);
-    }
+    // public function softDeleteService($id)
+    // {
+    //     return $this->delete($id);
+    // }
 
+public function softDeleteService($id)
+{
+    return $this->update($id, [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+}
 
     public function getAllServices()
     {

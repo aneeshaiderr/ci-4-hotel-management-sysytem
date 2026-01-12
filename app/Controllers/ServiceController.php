@@ -35,37 +35,36 @@ class ServiceController extends BaseController
     }
 
 
-    public function store()
+   public function store()
     {
-        if ($this->request->getMethod() == 'post') {
-            return redirect()->to('/services');
-        }
+        $request = Services::request();
 
-        $rules = [
-            'service_name' => 'required|min_length[3]',
-            'price'        => 'required|numeric',
-            'status'       => 'required|in_list[active,inactive]',
+
+
+ if ($request->getMethod() == 'post') {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request method'
+        ]);
+    }
+        $data = [
+            'service_name' => $request->getPost('service_name'),
+            'price'        => $request->getPost('price'),
+            'status'       => $request->getPost('status')
         ];
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
-
         try {
-            $this->serviceModel->createService([
-                'service_name' => $this->request->getPost('service_name'),
-                'price'        => $this->request->getPost('price'),
-                'status'       => $this->request->getPost('status'),
-            ]);
+            $this->serviceModel->insert($data);
 
-            return redirect()->to('/services')
-                ->with('success', 'Service created successfully!');
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Service created successfully!'
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -88,61 +87,63 @@ class ServiceController extends BaseController
         ]);
     }
 
-    public function update()
-    {
-        if ($this->request->getMethod() == 'post') {
-            return redirect()->to('/services');
-        }
+   public function update()
+{
+    $request = Services::request();
+    if ($request->getMethod() == 'post') {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request method']);
+    }
 
-        $id = $this->request->getPost('id');
+    $id = $request->getPost('id');
+    $data = [
+        'service_name' => $request->getPost('service_name'),
+        'price' => $request->getPost('price'),
+        'status' => $request->getPost('status'),
+    ];
 
-        if (! $id) {
-            return redirect()->to('/services')
-                ->with('error', 'Service ID missing!');
-        }
+    try {
+        $this->serviceModel->updateService($id, $data);
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Service updated successfully']);
+    } catch (\Exception $e) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Something went wrong!']);
+    }
+}
 
-        $rules = [
-            'service_name' => 'required|min_length[3]',
-            'price'        => 'required|numeric',
-            'status'       => 'required|in_list[active,inactive]',
-        ];
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
-
-        $this->serviceModel->updateService($id, [
-            'service_name' => $this->request->getPost('service_name'),
-            'price'        => $this->request->getPost('price'),
-            'status'       => $this->request->getPost('status'),
+  public function delete()
+{
+    if (! $this->request->isAJAX()) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request'
         ]);
+    }
 
-        return redirect()->to('/services')
-            ->with('success', 'Service updated successfully!');
+    $id = $this->request->getPost('id');
+
+    if (! $id) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Service ID missing'
+        ]);
     }
 
 
 
-    public function delete()
-    {
-        if ($this->request->getMethod() == 'post') {
-            return redirect()->to('/services');
-        }
-
-        $id = $this->request->getPost('id');
-
-        if (! $id) {
-            return redirect()->to('/services')
-                ->with('error', 'Invalid Service ID');
-        }
-
-        $this->serviceModel->softDeleteService($id);
-
-        return redirect()->to('/services')
-            ->with('success', 'Service deleted successfully!');
+    if ($this->serviceModel->delete($id)) {
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Service deleted successfully'
+        ]);
     }
+
+    return $this->response->setJSON([
+        'status' => 'error',
+        'message' => 'Delete failed'
+    ]);
+}
+
+
 }
 
 

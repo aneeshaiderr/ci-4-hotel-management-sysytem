@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Controllers\BaseController;
 use App\Models\DiscountModel;
 use Config\Services;
@@ -39,30 +41,40 @@ class DiscountController extends BaseController
     /**
      * Store new discount
      */
-    public function store()
-    {
-        if ($this->request->getMethod() == 'post') {
-            return redirect()->to('/discount');
-        }
+   public function store()
+{
+    $request = Services::request();
 
-        $data = [
-            'discount_type' => $this->request->getPost('discount_type'),
-            'discount_name' => $this->request->getPost('discount_name'),
-            'value'         => $this->request->getPost('value'),
-            'start_date'    => $this->request->getPost('start_date'),
-            'end_date'      => $this->request->getPost('end_date'),
-            'status'        => $this->request->getPost('status'),
-        ];
-
-        try {
-            $this->discountModel->insert($data);
-            $this->session->setFlashdata('success', 'Discount created successfully.');
-        } catch (\Exception $e) {
-            $this->session->setFlashdata('error', 'Error creating discount: '.$e->getMessage());
-        }
-
-        return redirect()->to('/discount');
+    if($request->getMethod() == 'post'){
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request method'
+        ]);
     }
+
+    $data = [
+        'discount_type' => $request->getPost('discount_type'),
+        'discount_name' => $request->getPost('discount_name'),
+        'value' => $request->getPost('value'),
+        'start_date' => $request->getPost('start_date'),
+        'end_date' => $request->getPost('end_date'),
+        'status' => $request->getPost('status')
+    ];
+
+    try {
+        $this->discountModel->createDiscount($data); // Model method
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Discount created successfully!'
+        ]);
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Something went wrong!'
+        ]);
+    }
+}
+
 
     /**
      * Show edit discount form
@@ -88,42 +100,53 @@ class DiscountController extends BaseController
      * Update discount
      */
     public function update()
-    {
-        if ($this->request->getMethod() == 'post') {
-            return redirect()->to('/discount');
-        }
+{
+    $request = $this->request;
 
-        $id = $this->request->getPost('id');
-        if (!$id) {
-            $this->session->setFlashdata('error', 'Discount ID is required.');
-            return redirect()->back()->withInput();
-        }
-
-        $data = [
-            'discount_type' => $this->request->getPost('discount_type'),
-            'discount_name' => $this->request->getPost('discount_name'),
-            'value'         => $this->request->getPost('value'),
-            'start_date'    => $this->request->getPost('start_date'),
-            'end_date'      => $this->request->getPost('end_date'),
-            'status'        => $this->request->getPost('status'),
-        ];
-
-        try {
-            $this->discountModel->update($id, $data);
-            $this->session->setFlashdata('success', 'Discount updated successfully.');
-        } catch (\Exception $e) {
-            $this->session->setFlashdata('error', 'Error updating discount: '.$e->getMessage());
-        }
-
-        return redirect()->to('/discount');
+    if ($request->getMethod() == 'post') {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request method'
+        ]);
     }
+
+    $id = $request->getPost('id');
+    if (!$id) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Discount ID is required'
+        ]);
+    }
+
+    $data = [
+        'discount_type' => $request->getPost('discount_type'),
+        'discount_name' => $request->getPost('discount_name'),
+        'value'         => $request->getPost('value'),
+        'start_date'    => $request->getPost('start_date'),
+        'end_date'      => $request->getPost('end_date'),
+        'status'        => $request->getPost('status'),
+    ];
+
+    try {
+        $this->discountModel->updateDiscount($id, $data);
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Discount updated successfully'
+        ]);
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Error updating discount: '.$e->getMessage()
+        ]);
+    }
+}
 
     /**
      * Soft delete discount
      */
    public function delete()
 {
-
+    // Only allow POST requests
     if ($this->request->getMethod() == 'post') {
         return redirect()->to('/discount');
     }
@@ -136,7 +159,9 @@ class DiscountController extends BaseController
     }
 
     // Soft delete using the model
-    $this->discountModel->softDeleteDiscount($id);
+    $this->discountModel->softDeleteDiscount($id
+
+);
 
     return redirect()->to('/discount')
         ->with('success', 'Discount deleted successfully!');

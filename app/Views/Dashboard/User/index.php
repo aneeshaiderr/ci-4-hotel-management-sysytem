@@ -1,5 +1,4 @@
 
-
 <div class="main-content d-flex flex-column min-vh-100">
 
     <!-- User Heading -->
@@ -21,10 +20,11 @@
                             <table class="table table-striped table-bordered align-middle">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>ID</th>
+
                                         <th>Username</th>
-                                        <th>status</th>
-                                        <th>identifier</th>
+                                        <th>first_name</th>
+                                        <th>last_name</th>
+                                        <th>email</th>
 
                                         <th>Action</th>
                                     </tr>
@@ -33,17 +33,28 @@
                                     <?php if(!empty($users)) : ?>
                                         <?php foreach($users as $user) : ?>
                                             <tr>
-                                                <td><?= esc($user['id']) ?></td>
-                                                <td><?= esc($user['username']) ?></td>
+                                               <td><?= esc($user['username']) ?></td>
+                                               <td> <?= isset($user['first_name']) ? esc($user['first_name']) : '' ?></td>
+                                                <td><?= esc($user['last_name']) ?></td>
 
-                                                 <td> <?= isset($user['status']) ? esc($user['status']) : '' ?></td>
-                                                <td><?= isset($user['identifier']) ? esc($user['identifier']) : '' ?></td>
+
+
+                                                <td><?= isset($user['email']) ? esc($user['email']) : '' ?></td>
 
                                                 <td>
                                                     <div class="d-flex gap-1">
-                                                    <a href="<?= base_url('user/edit?id=' . $user['id']) ?>" class="btn btn-sm btn-primary">View</a>
-                                                    <button type="button" onclick="submitDelete(<?= $user['id'] ?>)" class="btn btn-sm btn-danger">Delete</button>
-                                                </td>
+                                                   <a href="<?= base_url('user/edit/' . $user['id']) ?>" class="btn btn-sm btn-primary">
+    Edit
+</a>
+                                                    <!-- Delete Button (uses POST form) -->
+<form action="<?= base_url('user/delete') ?>" method="post" style="display:inline-block;"
+      onsubmit="return confirm('Are you sure you want to delete this user?');">
+    <?= csrf_field() ?>
+    <input type="hidden" name="id" value="<?= esc($user['id']) ?>">
+    <button type="submit" class="btn btn-sm btn-danger">
+        Delete
+    </button>
+</form>                                    </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -154,4 +165,26 @@ function submitDelete(id) {
         document.getElementById('deleteForm').submit();
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    const container = document.querySelector('.mb-3');
+
+    if(container) {
+
+        const helloBtn = document.createElement('button');
+
+
+        helloBtn.textContent = 'Say ';
+        helloBtn.className = 'btn btn-sm btn-info ms-2';
+
+
+        helloBtn.addEventListener('click', function() {
+            alert('Hello');
+        });
+
+
+        container.appendChild(helloBtn);
+    }
+});
 </script>

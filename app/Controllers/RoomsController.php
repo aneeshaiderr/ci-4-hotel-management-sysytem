@@ -44,10 +44,15 @@ class RoomsController extends BaseController
 {
 
     // Check if it's a POST request
-    if ($this->request->getMethod() == 'post') {
-        return redirect()->to(base_url('rooms'));
+    // if ($this->request->getMethod() == 'post') {
+    //     return redirect()->to(base_url('rooms'));
+    // }
+ if (!$this->request->isAJAX()) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request'
+        ]);
     }
-
     // Get POST data
     $data = [
         'room_number' => $this->request->getPost('room_number'),
@@ -57,7 +62,19 @@ class RoomsController extends BaseController
         'hotel_id'    => $this->request->getPost('hotel_id'),
         'status'      => $this->request->getPost('status'),
     ];
+ if (!$data['hotel_id']) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Please select hotel'
+        ]);
+    }
 
+    $this->roomModel->create($data);
+
+    return $this->response->setJSON([
+        'status' => 'success',
+        'message' => 'Room created successfully'
+    ]);
     try {
         // Insert into DB
         $this->roomModel->create($data);
@@ -110,32 +127,37 @@ class RoomsController extends BaseController
     /**
      * Update room
      */
-    public function update()
-    {
-        if ($this->request->getMethod() == 'post') {
-            return redirect()->to(base_url('rooms'));
-        }
+     public function update()
+{
 
-        $id = (int) $this->request->getPost('id');
-
-        $data = [
-            'room_number' => $this->request->getPost('room_number'),
-            'floor'       => $this->request->getPost('floor'),
-            'beds'        => $this->request->getPost('beds'),
-            'max_guests'  => $this->request->getPost('max_guests'),
-            'status'      => $this->request->getPost('status'),
-        ];
-
-        try {
-            $this->roomModel->updateRoom($id, $data);
-            $this->session->setFlashdata('success', 'Room updated successfully!');
-        } catch (\Exception $e) {
-            $this->session->setFlashdata('error', 'Something went wrong!');
-        }
-
-        return redirect()->to(base_url('rooms'));
+    $id = $this->request->getPost('id');
+    if (!$id) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Room ID is required'
+        ]);
     }
 
+    $data = [
+        'room_number' => $this->request->getPost('room_number'),
+        'floor'       => $this->request->getPost('floor'),
+        'beds'        => $this->request->getPost('beds'),
+        'max_guests'  => $this->request->getPost('max_guests'),
+        'status'      => $this->request->getPost('status'),
+    ];
+
+    if ($this->roomModel->update($id, $data)) {
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Room updated successfully'
+        ]);
+    }
+
+    return $this->response->setJSON([
+        'status'  => 'error',
+        'message' => 'DB update failed'
+    ]);
+}
     /**
      * Delete (soft delete) room
      */

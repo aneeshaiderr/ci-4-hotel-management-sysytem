@@ -9,8 +9,12 @@ class UserModel extends Model
     protected $table      = 'users';
     protected $primaryKey = 'id';
     protected $useTimestamps = true;
+
+    protected $useSoftDeletes   = true;
+
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
+    protected $deletedField  = 'deleted_at';
     protected $allowedFields = [
         'username', 'password', 'created_at', 'updated_at'
     ];
@@ -18,42 +22,101 @@ class UserModel extends Model
     /**
      * Get all users with auth_logins info (status + identifier)
      */
-    public function getAllUsers()
-    {
-        $builder = $this->db->table('users u');
-        $builder->select('
-            u.id,
-            u.username,
-            u.status,
-            al.identifier
-        ');
-        $builder->join('auth_logins al', 'al.user_id = u.id', 'left');
-        $builder->orderBy('u.id');
-
-        return $builder->get()->getResultArray();
-    }
-      public function createUser(array $data)
-    {
-   $db = $this->db;
-
-    $db->table('users')->insert([
-        'username'   => $data['username'],
-        'status'     => 1,
-        'created_at' => date('Y-m-d H:i:s'),
-    ]);
-
-    $userId = $db->insertID();
-
-
-    $db->table('auth_identities')->insert([
-        'user_id'    => $userId,
-
-        'identifier' => $data['identifier'],
-        'secret2'    => password_hash($data['password'], PASSWORD_DEFAULT),
-        'created_at' => date('Y-m-d H:i:s'),
-    ]);
-
-    return $userId;
+ public function getAllUsers(): array
+{
+    return $this->db->table('users u')
+        ->select('u.id, u.username, ui.first_name, ui.last_name, ui.email, ui.contact_no')
+        ->join('user_info ui', 'ui.user_id = u.id', 'left')
+        ->where('u.deleted_at', null) // Only non-deleted users
+        ->orderBy('u.id', 'ASC')
+        ->get()
+        ->getResultArray();
 }
+
+    /**
+     * Create user and save email in user_info table
+     */
+    public function createUser(array $data): int
+    {
+        $db = $this->db;
+
+        if (empty($data['email'])) {
+            throw new \InvalidArgumentException('Email is required');
+        }
+
+        $db->transStart();
+
+        // users table
+        $db->table('users')->insert([
+            'username'   => $data['username'],
+            'status'     => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        $userId = $db->insertID();
+
+        // user_info table
+         $db->table('user_info')->insert([
+            'user_id'    => $userId,
+            'email'      => $data['email'],
+            'first_name' => $data['first_name'],
+            'last_name'  => $data['last_name'],
+            'contact_no' => $data['contact_no'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            throw new \RuntimeException('Failed to create user');
+        }
+
+        return $userId;
+    }
+     public function updateUserWithInfo(int $id, array $data): bool
+    {
+        $this->db->transStart();
+
+        // Update users table
+        $this->update($id, [
+            'username' => $data['username']
+        ]);
+
+        // Update user_info table
+        $this->db->table('user_info')
+            ->where('user_id', $id)
+            ->update([
+                'first_name' => $data['first_name'],
+                'last_name'  => $data['last_name'],
+                'email'      => $data['email'],
+            ]);
+
+        $this->db->transComplete();
+
+        return $this->db->transStatus();
+    }
+    public function getUserWithInfo(int $id): ?array
+{
+    return $this->db->table('users u')
+        ->select('u.id, u.username, ui.first_name, ui.last_name, ui.email')
+        ->join('user_info ui', 'ui.user_id = u.id', 'left')
+        ->where('u.id', $id)
+        ->get()
+        ->getRowArray();
+}
+
+
+ public function softDeleteUser(int $id): bool
+    {
+        $this->db->transStart();
+
+
+        $this->delete($id);
+
+
+
+        $this->db->transComplete();
+
+        return $this->db->transStatus();
+    }
 
 }

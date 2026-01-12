@@ -12,6 +12,22 @@
                         <label for="hotel_code" class="form-label">Hotel Code</label>
                         <input type="text" class="form-control" id="hotel_code" name="hotel_code" required>
                     </div>
+
+
+<!-- Auth Identity Dropdown -->
+<div class="mb-3">
+    <label for="user_info_id" class="form-label">User Email (User Info)</label>
+    <select id="user_info_id" name="user_info_id" class="form-control" required>
+        <option value="">Select User Email</option>
+        <?php foreach ($emails as $email) : ?>
+            <option value="<?= esc($email['id']) ?>">
+                <?= esc($email['email']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+
+
                     <!-- Hotel -->
                     <div class="mb-3">
                         <label for="hotel_id" class="form-label">Hotel</label>
@@ -33,6 +49,10 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
+
+                    <!-- Staff -->
+
+
                     <!-- Discount -->
                     <div class="mb-3">
                         <label for="discount_id" class="form-label">Discount</label>

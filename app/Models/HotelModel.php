@@ -52,7 +52,7 @@ class HotelModel extends Model
      public function getAllHotels()
     {
         return $this->where('deleted_at', null)
-                    ->orderBy('id', 'DESC')
+                    ->orderBy('id')
                     ->findAll();
     }
 

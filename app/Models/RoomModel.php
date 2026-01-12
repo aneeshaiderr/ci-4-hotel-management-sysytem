@@ -51,7 +51,7 @@ class RoomModel extends Model
     public function getAllRooms()
     {
         return $this->where('deleted_at', null)
-                    ->orderBy('id', 'DESC')
+                    ->orderBy('id')
                     ->findAll();
     }
 
@@ -60,7 +60,7 @@ class RoomModel extends Model
      */
     public function getAll()
     {
-        return $this->findAll(); // includes soft deleted if use withDeleted()
+        return $this->findAll();
     }
 
     /**

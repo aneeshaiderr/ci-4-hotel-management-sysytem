@@ -48,9 +48,9 @@ class DiscountModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-     public function getAllDiscounts()
-    {
-        return $this->select([
+    public function getAllDiscounts()
+{
+    return $this->select([
                 'id',
                 'discount_type',
                 'discount_name',
@@ -59,10 +59,9 @@ class DiscountModel extends Model
                 'end_date',
                 'status',
             ])
-            ->where('deleted_at', null)
-            ->orderBy('start_date', 'DESC')
+            ->orderBy('start_date', 'ASC')
             ->findAll();
-    }
+}
 
     /**
      * Find single discount by ID

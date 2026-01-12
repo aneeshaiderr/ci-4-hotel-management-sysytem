@@ -1,13 +1,14 @@
-
 <div class="main-content d-flex flex-column min-vh-100">
   <div class="container py-5">
     <main>
       <div class="mx-auto" style="max-width: 700px;">
-        <h5 class="fw-bold mt-5 text-primary">Create User</h5>
+
+        <h5 class="fw-bold mb-4 text-primary">Update User</h5>
 
         <!-- Use CI4 Form Helper -->
-        <?= form_open('', ['id' => 'createUserForm']) ?>
+        <?= form_open('', ['id' => 'updateUserForm']) ?>
         <?= csrf_field() ?>
+        <?= form_hidden('id', esc($user['id'])) ?>
 
         <!-- Username -->
         <div class="mb-3">
@@ -15,9 +16,8 @@
           <?= form_input([
             'name' => 'username',
             'id' => 'username',
-            'value' => old('username'),
+            'value' => esc($user['username']),
             'class' => 'form-control',
-            'placeholder' => 'Enter username',
             'required' => true
           ]) ?>
           <div class="invalid-feedback" id="error-username"></div>
@@ -29,9 +29,8 @@
           <?= form_input([
             'name' => 'first_name',
             'id' => 'first_name',
-            'value' => old('first_name'),
+            'value' => esc($user['first_name']),
             'class' => 'form-control',
-            'placeholder' => 'Enter first name',
             'required' => true
           ]) ?>
           <div class="invalid-feedback" id="error-first_name"></div>
@@ -43,9 +42,8 @@
           <?= form_input([
             'name' => 'last_name',
             'id' => 'last_name',
-            'value' => old('last_name'),
+            'value' => esc($user['last_name']),
             'class' => 'form-control',
-            'placeholder' => 'Enter last name',
             'required' => true
           ]) ?>
           <div class="invalid-feedback" id="error-last_name"></div>
@@ -58,82 +56,57 @@
             'name' => 'email',
             'id' => 'email',
             'type' => 'email',
-            'value' => old('email'),
+            'value' => esc($user['email']),
             'class' => 'form-control',
-            'placeholder' => 'Enter email',
             'required' => true
           ]) ?>
           <div class="invalid-feedback" id="error-email"></div>
         </div>
 
-        <!-- Contact Number -->
-        <div class="mb-3">
-          <?= form_label('Contact Number', 'contact_no') ?>
-          <?= form_input([
-            'name' => 'contact_no',
-            'id' => 'contact_no',
-            'value' => old('contact_no'),
-            'class' => 'form-control',
-            'placeholder' => 'Enter contact number',
-            'required' => true
+        <!-- Buttons -->
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <a href="<?= base_url('user') ?>" class="btn btn-secondary">Cancel</a>
+          <?= form_button([
+            'type' => 'submit',
+            'id' => 'submitBtn',
+            'class' => 'btn btn-success',
+            'content' => 'Update'
           ]) ?>
-          <div class="invalid-feedback" id="error-contact_no"></div>
-        </div>
-
-        <!-- Password -->
-        <div class="mb-3">
-          <?= form_label('Password', 'password') ?>
-          <?= form_password([
-            'name' => 'password',
-            'id' => 'password',
-            'class' => 'form-control',
-            'placeholder' => 'Enter password',
-            'required' => true
-          ]) ?>
-          <div class="invalid-feedback" id="error-password"></div>
-        </div>
-
-        <!-- Buttons: Back + Create -->
-        <div class="d-flex mt-3 gap-2">
-          <a href="<?= base_url('user') ?>" class="btn btn-secondary fw-bold">
-            ← Back
-          </a>
-
-          <?= form_button(['type'=>'submit','id'=>'submitBtn','class'=>'btn btn-primary','content'=>'Create User']) ?>
-
         </div>
 
         <?= form_close() ?>
+
       </div>
     </main>
   </div>
 </div>
 
-<!-- AJAX Script -->
+
 <script>
-$(function() {
-    $('#createUserForm').on('submit', function(e) {
+$(document).ready(function() {
+    $('#updateUserForm').on('submit', function(e) {
         e.preventDefault();
 
-
-         const form = this;
+       const form = this;
          const formData = $(form).serialize();
+
         $.ajax({
-            url: "<?= base_url('user/store') ?>",
+            url: "<?= base_url('user/update') ?>",
             type: "POST",
             data: $(this).serialize(),
             dataType: "json",
             beforeSend: function() {
-                $('#submitBtn').prop('disabled', true).text('Creating...');
+                $('#submitBtn').prop('disabled', true).text('Updating...');
             },
             success: function(response) {
                 if(response.status === 'success') {
-                    alert(response.message);
-                    $('#createUserForm')[0].reset();
+                    alert(response.message || 'User updated successfully!');
+                    // Optionally redirect
+                    window.location.href = "<?= base_url('user') ?>";
                 } else if(response.status === 'validation') {
                     $.each(response.errors, function(field, message) {
-                        $('#'+field).addClass('is-invalid');
-                        $('#error-'+field).text(message);
+                        $('#' + field).addClass('is-invalid');
+                        $('#error-' + field).text(message);
                     });
                 } else {
                     alert(response.message || 'Something went wrong!');
@@ -144,7 +117,7 @@ $(function() {
                 alert('Server error!');
             },
             complete: function() {
-                $('#submitBtn').prop('disabled', false).text('Create User');
+                $('#submitBtn').prop('disabled', false).text('Update');
             }
         });
     });

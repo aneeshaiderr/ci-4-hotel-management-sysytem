@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('sidebar');
     const content = document.querySelector('.main-content');
     const navbar  = document.querySelector('.navbar');
-    const footer  = document.querySelector('.footer'); 
+    const footer  = document.querySelector('.footer');
     const overlay = document.querySelector('.overlay');
     const fsBtn   = document.querySelector('.js-fullscreen');
 
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sidebar.classList.toggle('active');
       navbar.classList.toggle('active');
       content.classList.toggle('active');
-      footer.classList.toggle('active');  
+      footer.classList.toggle('active');
       if (window.innerWidth <= 768) overlay.classList.toggle('active');
     };
 
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sidebar.classList.remove('active');
       navbar.classList.remove('active');
       content.classList.remove('active');
-      footer.classList.remove('active'); 
+      footer.classList.remove('active');
       overlay.classList.remove('active');
     };
 
@@ -38,23 +38,99 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
     }
+$(function(){
+  const hotels = [
+    <?php foreach ($hotels as $hotel): ?>
+      { id: <?= $hotel['id'] ?>, hotel_name: "<?= addslashes($hotel['hotel_name']) ?>" },
+    <?php endforeach; ?>
+  ];
 
-    // data table 
-var table = 
- $('#example').DataTable({
-     dom: '<"top d-flex justify-content-between align-items-center"<"filter-container">f>rt<"bottom d-flex justify-content-between align-items-center gap-3"lip>',
-    pagingType: "simple_numbers", 
-      paging: true,         
-      searching: true,       
-      info: false,           
-      lengthChange: true,   
-      language: {
-        paginate: {
-          previous: "Previous",
-          next: "Next"
-        }
-      }
+  const $input = $('#hotelSearch');
+  const $list = $('#hotelList');
+
+  // Show all hotels on click
+  $input.on('focus click', () => {
+    $list.empty().show();
+    hotels.forEach(h => $list.append(`<li class="list-group-item list-group-item-action" data-id="${h.id}">${h.hotel_name}</li>`));
+  });
+
+  // Filter on typing
+  $input.on('input', function(){
+    const query = this.value.toLowerCase();
+    $list.empty();
+    hotels
+      .filter(h => h.hotel_name.toLowerCase().includes(query))
+      .forEach(h => $list.append(`<li class="list-group-item list-group-item-action" data-id="${h.id}">${h.hotel_name}</li>`));
+    $list.toggle($list.children().length > 0);
+  });
+
+  // Select hotel
+  $list.on('click', 'li', function(){
+    $input.val($(this).text());
+    $('#hotel_id').val($(this).data('id'));
+    $list.hide();
+  });
+
+  // Hide list on outside click
+  $(document).on('click', e => {
+    if (!$(e.target).closest('.mb-4').length) $list.hide();
+  });
+});
+$(function () {
+
+    $('#createRoomForm').on('submit', function (e) {
+        e.preventDefault();
+console.log ($(this).serialize());
+        $.ajax({
+            url: "<?= base_url('room/store') ?>",
+            type: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+
+            beforeSend: function () {
+                $('button[type="submit"]').prop('disabled', true).text('Saving...');
+            },
+
+            success: function (response) {
+                if (response.status === 'success') {
+                    alert(response.message);
+
+                    $('#createRoomForm')[0].reset();
+                    $('#hotelSearch').val('');
+                    $('#hotel_id').val('');
+                } else {
+                    alert(response.message);
+                }
+            },
+
+            error: function (xhr) {
+                alert('Server error!');
+                console.log(xhr.responseText);
+            },
+
+            complete: function () {
+                $('button[type="submit"]').prop('disabled', false).text('Create');
+            }
+        });
     });
+
+});
+    // data table
+// var table =
+//  $('#example').DataTable({
+//      dom: '<"top d-flex justify-content-between align-items-center"<"filter-container">f>rt<"bottom d-flex justify-content-between align-items-center gap-3"lip>',
+//     pagingType: "simple_numbers",
+//       paging: true,
+//       searching: true,
+//       info: false,
+//       lengthChange: true,
+//       language: {
+//         paginate: {
+//           previous: "Previous",
+//           next: "Next"
+//         }
+//       }
+//     });
 
 
   // Custom filter with Bootstrap icon dropdown
@@ -73,52 +149,52 @@ var table =
       </ul>
     </div>
   `);
-//   hotel filter 
+//   hotel filter
 
-  $(document).on('click', '.filter-option', function (e) {
-      e.preventDefault();
-      var val = $(this).data('value'); 
-      if (val) {
-        
-          table.column(1).search(val, true, false).draw();
-      } else {
-         
-          table.column(1).search('').draw();
-      }
-  });
-  // Filter functionality
-  $(document).on('click', '.filter-option', function (e) {
-      e.preventDefault(); 
-      var val = $(this).data('value');
-      if (val) {
-          table.column(5).search(val, true, false).draw();
-      } else {
-          table.column(5).search('').draw();
-      }
-  });
+  // $(document).on('click', '.filter-option', function (e) {
+  //     e.preventDefault();
+  //     var val = $(this).data('value');
+  //     if (val) {
 
-  Highcharts.chart('movementChart', {
-    chart: { type: 'line', height: 250 },
-    title: { text: null },
-    xAxis: { categories: ['Week 1','Week 2','Week 3','Week 4'] },
-    yAxis: { title: { text: 'Values' } },
-    series: [
-      { name: 'Sales', data: [5, 7, 3, 5] },
-      { name: 'Earnings', data: [3, 2, 4, 6] }
-    ]
-  });
+  //         table.column(1).search(val, true, false).draw();
+  //     } else {
 
-  Highcharts.chart('monthlyChart', {
-    chart: { type: 'column', height: 250 },
-    title: { text: null },
-    xAxis: { categories: ['2021','2022','2023','2024'] },
-    yAxis: { title: { text: 'Values' } },
-    series: [
-      { name: '2021', data: [3, 4, 5] },
-      { name: '2022', data: [1, 4, 7] },
-      { name: '2023', data: [2, 3, 6] },
-      { name: '2024', data: [3, 4, 8, 4] }
-    ]
-  });
-  
+  //         table.column(1).search('').draw();
+  //     }
+  // });
+  // // Filter functionality
+  // $(document).on('click', '.filter-option', function (e) {
+  //     e.preventDefault();
+  //     var val = $(this).data('value');
+  //     if (val) {
+  //         table.column(5).search(val, true, false).draw();
+  //     } else {
+  //         table.column(5).search('').draw();
+  //     }
+  // });
+
+  // Highcharts.chart('movementChart', {
+  //   chart: { type: 'line', height: 250 },
+  //   title: { text: null },
+  //   xAxis: { categories: ['Week 1','Week 2','Week 3','Week 4'] },
+  //   yAxis: { title: { text: 'Values' } },
+  //   series: [
+  //     { name: 'Sales', data: [5, 7, 3, 5] },
+  //     { name: 'Earnings', data: [3, 2, 4, 6] }
+  //   ]
+  // });
+
+  // Highcharts.chart('monthlyChart', {
+  //   chart: { type: 'column', height: 250 },
+  //   title: { text: null },
+  //   xAxis: { categories: ['2021','2022','2023','2024'] },
+  //   yAxis: { title: { text: 'Values' } },
+  //   series: [
+  //     { name: '2021', data: [3, 4, 5] },
+  //     { name: '2022', data: [1, 4, 7] },
+  //     { name: '2023', data: [2, 3, 6] },
+  //     { name: '2024', data: [3, 4, 8, 4] }
+  //   ]
+  // });
+
 });

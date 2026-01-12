@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Controllers;
+
 use App\Models\ReservationModel;
 use App\Models\UserModel;
 use App\Models\HotelModel;
 use App\Models\RoomModel;
 use App\Models\DiscountModel;
+use App\Models\UserInfoModel;
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
 
 class ReservationController extends BaseController
 {
@@ -16,6 +17,7 @@ class ReservationController extends BaseController
     protected $hotelModel;
     protected $roomModel;
     protected $discountModel;
+    protected $userInfoModel;
     protected $session;
 
     public function __construct()
@@ -25,79 +27,87 @@ class ReservationController extends BaseController
         $this->hotelModel       = new HotelModel();
         $this->roomModel        = new RoomModel();
         $this->discountModel    = new DiscountModel();
+        $this->userInfoModel    = new UserInfoModel();
         $this->session          = session();
     }
 
     /** List all reservations */
     public function index()
     {
-        $userId = $this->session->get('user_id');
-
-
+        $userId = $this->session->get('user_id'); // optional filter
+$emails = $this->userInfoModel->getAllEmails();
         $reservations = $this->reservationModel->getAllReservations($userId);
 
         return $this->render('Dashboard/Reservation/reservation', [
             'reservations' => $reservations,
+            'emails' => $emails,
         ]);
     }
 
     /** Show create reservation form */
     public function create()
     {
+        $emails = $this->userInfoModel->getAllEmails(); // get emails from user_info
 
-        return $this->render('dashboard/Reservation/create', [
+        return $this->render('Dashboard/Reservation/create', [
             'users'     => $this->userModel->findAll(),
             'hotels'    => $this->hotelModel->findAll(),
             'rooms'     => $this->roomModel->getAllRooms(),
             'discounts' => $this->discountModel->findAll(),
-
+            'emails'    => $emails,
         ]);
     }
 
     /** Store reservation */
-    public function store()
-    {
+    /** Store reservation */
+public function store()
+{
     $request = service('request');
     $session = session();
 
-    $authId = $request->getPost('auth_id');
+    // Validate input
+    $validation = \Config\Services::validation();
+    $validation->setRules([
+        'hotel_code'    => 'required',
+        'user_info_id'  => 'required|numeric',  // foreign key
+        'hotel_id'      => 'required|numeric',
+        'room_id'       => 'required|numeric',
+        'discount_id'   => 'permit_empty|numeric',
+        'check_in'      => 'required|valid_date[Y-m-d]',
+        'check_out'     => 'required|valid_date[Y-m-d]',
+        'status'        => 'required',
+    ]);
 
-    if (!$authId) {
-        $session->setFlashdata('error', 'Please select a user email.');
-        return redirect()->back()->withInput();
+    if (!$validation->withRequest($request)->run()) {
+        return redirect()->back()->withInput()->with('errors', $validation->getErrors());
     }
 
-    // Get user_id from auth_identities
-    // $authModel = new \App\Models\AuthIdentitiesModel();
-    $authData = $authModel->find($authId);
-
-    if (!$authData) {
-        $session->setFlashdata('error', 'Invalid Auth Identity selected.');
-        return redirect()->back()->withInput();
-    }
-
-    $userId = $authData['user_id'];
-
+    // Prepare data for insert
     $data = [
-        'hotel_code' => $request->getPost('hotel_code'),
-        'auth_id'    => $authId,
-        'user_id'    => $userId,
-        'hotel_id'   => $request->getPost('hotel_id'),
-        'room_id'    => $request->getPost('room_id'),
-        'discount_id'=> $request->getPost('discount_id') ?: null,
-        'check_in'   => $request->getPost('check_in'),
-        'check_out'  => $request->getPost('check_out'),
-        'status'     => $request->getPost('status'),
+        'hotel_code'    => $request->getPost('hotel_code'),
+        'user_info_id'  => (int) $request->getPost('user_info_id'), // mandatory FK
+        'hotel_id'      => (int) $request->getPost('hotel_id'),
+        'room_id'       => (int) $request->getPost('room_id'),
+        'discount_id'   => $request->getPost('discount_id') ?: null,
+        'check_in'      => $request->getPost('check_in'),
+        'check_out'     => $request->getPost('check_out'),
+        'status'        => $request->getPost('status'),
     ];
 
+    // Insert into DB
     $reservationModel = new ReservationModel();
-    $reservationModel->insert($data);
+    $insertId = $reservationModel->insert($data);
 
-    $session->setFlashdata('success', 'Reservation created successfully!');
-    return redirect()->to(base_url('/reservation'));
+    if ($insertId) {
+        $session->setFlashdata('success', 'Reservation created successfully!');
+        return redirect()->to('/reservation');
+    } else {
+        $session->setFlashdata('error', 'Failed to create reservation.');
+        return redirect()->back()->withInput();
+    }
 }
 
-    /** Show edit form */
+    /** Show edit reservation form */
     public function edit($id)
     {
         $reservation = $this->reservationModel->find($id);
@@ -107,7 +117,7 @@ class ReservationController extends BaseController
             return redirect()->to('/reservation');
         }
 
-        return $this->render('dashboard/Reservation/editReservation', [
+        return $this->render('Dashboard/Reservation/edit', [
             'reservation' => $reservation,
             'hotels'      => $this->hotelModel->findAll(),
             'rooms'       => $this->roomModel->getAllRooms(),
@@ -116,35 +126,43 @@ class ReservationController extends BaseController
     }
 
     /** Update reservation */
-    public function update()
-    {
-        if ($this->request->getMethod() !== 'post') {
-            return redirect()->to('/reservation');
-        }
-
-        $id = $this->request->getPost('id');
-        if (!$id) {
-            $this->session->setFlashdata('error', 'Reservation ID is required.');
-            return redirect()->to('/reservation');
-        }
-
-        $data = [
-            'hotel_code'  => $this->request->getPost('hotel_code'),
-            'user_id'     => $this->request->getPost('user_id'),
-            'hotel_id'    => $this->request->getPost('hotel_id'),
-            'room_id'     => $this->request->getPost('room_id'),
-            'discount_id' => $this->request->getPost('discount_id') ?: null,
-            'check_in'    => $this->request->getPost('check_in'),
-            'check_out'   => $this->request->getPost('check_out'),
-            'status'      => $this->request->getPost('status'),
-            'updated_at'  => date('Y-m-d H:i:s'),
-        ];
-
-        $this->reservationModel->update($id, $data);
-
-        $this->session->setFlashdata('success', 'Reservation updated successfully.');
+  public function update()
+{
+    if ($this->request->getMethod() == 'post') {
         return redirect()->to('/reservation');
     }
+
+    $id = (int) $this->request->getPost('id');
+    if (!$id) {
+        $this->session->setFlashdata('error', 'Reservation ID is required.');
+        return redirect()->to('/reservation');
+    }
+    $userInfoId = (int) $this->request->getPost('user_info_id');
+
+    if (!$userInfoId) {
+        $this->session->setFlashdata('error', 'Please select user email.');
+        return redirect()->back()->withInput();
+    }
+
+    $data = [
+        'hotel_code'   => $this->request->getPost('hotel_code'),
+        'user_info_id' => $userInfoId,
+        'hotel_id'     => (int) $this->request->getPost('hotel_id'),
+        'room_id'      => (int) $this->request->getPost('room_id'),
+        'discount_id'  => $this->request->getPost('discount_id') ?: null,
+        'check_in'     => $this->request->getPost('check_in'),
+        'check_out'    => $this->request->getPost('check_out'),
+        'status'       => $this->request->getPost('status'),
+    ];
+
+    if ($this->reservationModel->update($id, $data)) {
+        $this->session->setFlashdata('success', 'Reservation updated successfully.');
+    } else {
+        $this->session->setFlashdata('error', 'Failed to update reservation.');
+    }
+
+    return redirect()->to('/reservation');
+}
 
     /** Delete reservation (soft delete) */
     public function delete()
@@ -157,8 +175,8 @@ class ReservationController extends BaseController
         }
 
         $this->reservationModel->where('hotel_code', $hotelCode)
-         ->set(['deleted_at' => date('Y-m-d H:i:s')])
-         ->update();
+                               ->set(['deleted_at' => date('Y-m-d H:i:s')])
+                               ->update();
 
         $this->session->setFlashdata('success', 'Reservation deleted successfully.');
         return redirect()->to('/reservation');
@@ -169,7 +187,7 @@ class ReservationController extends BaseController
     {
         $reservation = $this->reservationModel->getReservationById($id);
 
-        return view('dashboard/Reservation/reservationDetail', [
+        return view('Dashboard/Reservation/reservationDetail', [
             'reservation' => $reservation,
         ]);
     }

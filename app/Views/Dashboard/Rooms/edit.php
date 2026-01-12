@@ -5,7 +5,7 @@
 
                 <h5 class="fw-bold mb-4">Edit Room</h5>
 
-                <form method="POST" action="<?= base_url('room/update') ?>">
+                <form method="POST" id="editRoomForm" >
                     <?= csrf_field() ?>
 
                     <input type="hidden" name="id" value="<?= (int) $room['id'] ?>">
@@ -56,6 +56,7 @@
                     <div class="mt-6 d-flex justify-content-end gap-2">
                         <a href="<?= base_url('rooms') ?>" class="btn btn-secondary">Cancel</a>
                         <button type="submit"
+                          id="updateBtn"
                                 class="btn btn-success"
                                 style="background-color:#16a34a;"
                                 onmouseover="this.style.backgroundColor='#15803d'"
@@ -69,3 +70,53 @@
         </main>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(function () {
+
+    $('#editRoomForm').on('submit', function (e) {
+        e.preventDefault();
+
+        console.log($(this).serialize());
+
+        $.ajax({
+            url: "<?= base_url('room/update') ?>",
+            type: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+
+            beforeSend: function () {
+                $('#updateBtn')
+                    .prop('disabled', true)
+                    .text('Updating...');
+            },
+
+            success: function (response) {
+
+                if (response.status === 'success') {
+                    alert(response.message);
+
+                    // redirect after success
+                    window.location.href = "<?= base_url('rooms') ?>";
+
+                } else {
+                    alert(response.message || 'Update failed');
+                }
+            },
+
+            error: function (xhr) {
+                alert('Server error!');
+                console.log(xhr.responseText);
+            },
+
+            complete: function () {
+                $('#updateBtn')
+                    .prop('disabled', false)
+                    .text('Update');
+            }
+        });
+    });
+
+});
+</script>

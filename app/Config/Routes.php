@@ -50,19 +50,18 @@ $routes->get('discount', 'DiscountController::index');
 $routes->get('reservation','ReservationController::index');
  $routes->get('reservation/create', 'ReservationController::create');
     $routes->post('reservation/store', 'ReservationController::store');
-    $routes->get('edit/(:num)', 'ReservationController::edit/$1');
-    $routes->post('update', 'ReservationController::update');
+    $routes->get('reservation/edit/(:num)', 'ReservationController::edit/$1');
+    $routes->post('reservation/update', 'ReservationController::update');
     $routes->post('delete', 'ReservationController::delete');
-// $routes->get('signup', 'Signup::index');
-// $routes->post('signup', 'Signup::store');
-// $routes->get('signup', 'Signup::index');
-// $routes->post('signup', 'Signup::index');
-// dashboard/user/index
-// $routes->get('index', 'UserController::index');
+
 $routes->get('user', 'UserController::index');
 
 $routes->get('user/create', 'UserController::create');
+// $routes->get('user/edit', 'UserController::edit');
+$routes->get('user/edit/(:num)', 'UserController::edit/$1');
 $routes->post('user/store', 'UserController::store');
+$routes->post('user/update', 'UserController::update');
+$routes->post('user/delete', 'UserController::delete');
 // $routes->post('hotel', 'HotelController::index');
 $routes->get('hotel', 'HotelController::index');
 
@@ -92,36 +91,8 @@ $routes->get('hotel', 'HotelController::index');
     // Delete room
     $routes->post('room/delete', 'RoomsController::delete');
 
-$routes->group('hotel', function($routes) {
-    // List all hotels
-    // $routes->get('', 'HotelController::index');
 
-    // // Show create hotel form
-    // $routes->get('create', 'HotelController::create');
 
-    // Store new hotel
-    // $routes->post('hotel/store', 'HotelController::store');
-
-    // Show hotel details / edit form
-    // $routes->get('hotel/eidt', 'HotelController::show');
-
-    // Update hotel
-    // $routes->post('update', 'HotelController::update');
-
-    // Soft delete hotel
-    // $routes->post('delete', 'HotelController::delete');
-});
-
-// $routes->group('dashboard', function($routes) {
-
-//     // User routes
-//     $routes->get('Dashboard/User', 'Dashboard\UserController::index'); // dashboard/user -> index.php
-//     $routes->get('user/create', 'Dashboard\UserController::create'); // dashboard/user/create
-//     $routes->post('user/store', 'Dashboard\UserController::store'); // store new user
-//     $routes->get('user/edit', 'Dashboard\UserController::editUser'); // dashboard/user/edit?id=1
-//     $routes->post('user/update', 'Dashboard\UserController::update'); // update user
-//     $routes->post('user/softDelete', 'Dashboard\UserController::softDelete'); // delete user
-// });
 
 service('auth')->routes($routes);
 

@@ -4,8 +4,8 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
-// use CodeIgniter\Exceptions\PageForbiddenException;
-
+use CodeIgniter\Config\Services;
+use App\Libraries\UserInfoLibrary;
 class UserController extends BaseController
 {
     protected UserModel $userModel;
@@ -23,12 +23,6 @@ class UserController extends BaseController
         // Load view
          return $this->render('Dashboard/User/index', ['users' => $users]);
 
-        // if ($user->inGroup('super_admin')) {
-        //     return view('dashboard/user/index', [
-        //         'users' => $this->userModel->findAll(),
-        //     ]);
-        // }
-//   return view('layout/dashboard', ['content' => $content]);
         if ($user->inGroup('staff'))
              {
             $this->render('dashboard/staff/staff', [
@@ -40,7 +34,7 @@ class UserController extends BaseController
        $this->render('dashboard/user/user', [
             'user'               => $user,
             'currentReservation' => $this->userModel
-                // ->getCurrentReservation($user->id),
+                ->getCurrentReservation($user->id),
         ]);
     }
  public function create()
@@ -53,58 +47,142 @@ class UserController extends BaseController
      */
     public function store()
 {
-    $validation = \Config\Services::validation();
+    $validation = Services::validation();
 
     $validation->setRules([
         'username'   => 'required|min_length[3]',
-        'identifier' => 'required|valid_email',
+        'first_name' => 'required',
+        'last_name'  => 'required',
+        'contact_no' => 'permit_empty|numeric',
+        'email'      => 'required|valid_email',
         'password'   => 'required|min_length[6]',
     ]);
 
+    // Run validation
     if (!$validation->withRequest($this->request)->run()) {
-        return view('Dashboard/User/create', [
-            'validation' => $validation
+
+        return $this->response->setJSON([
+            'status' => 'validation',
+            'errors' => $validation->getErrors()
+        ]);
+    }
+
+    // Prepare data
+    $data = [
+        'username'   => $this->request->getPost('username'),
+        'first_name' => $this->request->getPost('first_name'),
+        'last_name'  => $this->request->getPost('last_name'),
+        'contact_no' => $this->request->getPost('contact_no'),
+        'email'      => $this->request->getPost('email'),
+        'password'   => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+    ];
+
+    try {
+        // Save user
+        $userId = $this->userModel->createUser($data);
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'User created successfully!',
+            'user_id' => $userId
+        ]);
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status'  => 'error',
+            'message' => 'Something went wrong: ' . $e->getMessage()
+        ]);
+    }
+}
+
+     public function edit( $id)
+    {
+        $user = $this->userModel->getUserWithInfo($id);
+
+        if (!$user) {
+            return redirect()->to('/user')->with('error', 'User not found');
+        }
+
+        return $this->render('Dashboard/User/edit', ['user' => $user]);
+    }
+
+    /**
+     * Update user info
+     */
+  public function update()
+{
+    $validation = Services::validation();
+
+    $validation->setRules([
+        'username'   => 'required|min_length[3]',
+        'first_name' => 'required',
+        'last_name'  => 'required',
+        'email'      => 'required|valid_email',
+    ]);
+
+    if (!$validation->withRequest($this->request)->run()) {
+
+        return $this->response->setJSON([
+            'status' => 'validation',
+            'errors' => $validation->getErrors(),
+        ]);
+    }
+
+    $id = (int) $this->request->getPost('id');
+
+    if (!$id) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'User ID is required.'
         ]);
     }
 
     $data = [
         'username'   => $this->request->getPost('username'),
-        'identifier' => $this->request->getPost('identifier'),
-        'password'   => $this->request->getPost('password'),
+        'first_name' => $this->request->getPost('first_name'),
+        'last_name'  => $this->request->getPost('last_name'),
+        'email'      => $this->request->getPost('email'),
     ];
 
-    $userId = $this->userModel->createUser($data);
+    try {
+        $success = $this->userModel->updateUserWithInfo($id, $data);
 
-    return redirect()->to('/user')->with('success', 'User created successfully');
-}
-    public function edit($id = null)
-    {
-
-        $id ??= auth()->id();
-
-        $user = $this->userModel->find($id);
-
-        if (! $user) {
-            return redirect()
-                ->to('/user')
-                ->with('error', 'User not found');
+        if ($success) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'User updated successfully'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to update user'
+            ]);
         }
-
-        return view('dashboard/user/editUser', [
-            'user' => $user,
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Server error: ' . $e->getMessage()
         ]);
     }
-
-    public function delete()
-    {
+}
 
 
-        $id = $this->request->getPost('id');
+  // Soft delete user
+public function delete()
+{
+    $id = (int) $this->request->getPost('id');
 
-        $this->userModel->delete($id);
-
-        return redirect()
-            ->to('/user')
-            ->with('success', 'User deleted successfully');
+    if (!$id) {
+        return redirect()->back()->with('error', 'Invalid user ID');
     }
+
+    $deleted = $this->userModel->softDeleteUser($id);
+
+    if ($deleted) {
+        return redirect()->to('/user')
+            ->with('success', 'User deleted successfully (soft delete).');
+    }
+
+    return redirect()->back()->with('error', 'Failed to delete user');
+}
+
 }

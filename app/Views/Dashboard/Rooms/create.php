@@ -5,7 +5,7 @@
                 <h2 class="mb-4">Create Room</h2>
 
                 <!-- CI4 form action -->
-                <form method="POST" action="<?= base_url('room/store') ?>">
+                <form method="POST" id="createRoomForm">
                     <?= csrf_field() ?>
 
                     <div class="mb-4">
@@ -101,5 +101,45 @@ $(function(){
   $(document).on('click', e => {
     if (!$(e.target).closest('.mb-4').length) $list.hide();
   });
+});
+
+$(function () {
+
+    $('#createRoomForm').on('submit', function (e) {
+        e.prevensstDefault();
+       console.log ($(this).serialize());
+        $.ajax({
+            url: "<?= base_url('room/store') ?>",
+            type: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+
+            beforeSend: function () {
+                $('button[type="submit"]').prop('disabled', true).text('Saving...');
+            },
+
+            success: function (response) {
+                if (response.status === 'success') {
+                    alert(response.message);
+
+                    $('#createRoomForm')[0].reset();
+                    $('#hotelSearch').val('');
+                    $('#hotel_id').val('');
+                } else {
+                    alert(response.message);
+                }
+            },
+
+            error: function (xhr) {
+                alert('Server error!');
+                console.log(xhr.responseText);
+            },
+
+            complete: function () {
+                $('button[type="submit"]').prop('disabled', false).text('Create');
+            }
+        });
+    });
+
 });
 </script>
