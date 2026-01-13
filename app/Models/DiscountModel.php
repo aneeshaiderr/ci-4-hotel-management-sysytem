@@ -48,7 +48,7 @@ class DiscountModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-    public function getAllDiscounts()
+  public function getAllDiscounts()
 {
     return $this->select([
                 'id',

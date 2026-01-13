@@ -1,0 +1,35 @@
+<script>
+$(document).ready(function() {
+
+    $('.delete-form').on('submit',  function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var message = form.data('confirm');
+
+        if (!confirm(message)) {
+            return;
+        }
+
+        $.ajax({
+            url: form.attr('action'),
+            type: "POST",
+            data: form.serialize(),
+
+            success: function(data) {
+                if (data.status === 'success') {
+                    form.closest('tr').remove();
+                    alert(data.message);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function(err) {
+                console.error(err);
+                alert('Something went wrong!');
+            }
+        });
+    });
+
+});
+</script>

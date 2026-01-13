@@ -49,11 +49,11 @@
                     <a href="<?= base_url('room/edit/' . $room['id']) ?>"
                        class="btn btn-sm btn-success me-2">View</a>
 
-                    <form action="<?= base_url('room/delete') ?>" method="POST" style="display:inline;">
+                    <form class="delete-form" action="<?= base_url('room/delete') ?>" data-confirm="Are you sure you want to delete this Room?" style="display:inline;">
                       <?= csrf_field() ?>
                       <input type="hidden" name="id" value="<?= esc($room['id']) ?>">
                       <button type="submit" class="btn btn-sm btn-danger"
-                          onclick="return confirm('Are you sure you want to delete this room?');">
+                         >
                           Delete
                       </button>
                     </form>

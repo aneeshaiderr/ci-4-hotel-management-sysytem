@@ -38,12 +38,10 @@
                                     <td><?= esc($hotel['contact_no']) ?></td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-               <a href="<?= base_url('hotel/edit/' . $hotel['id']) ?>"
-                  class="btn btn-sm btn-primary py-1 px-3">view</a>
+                             <a href="<?=base_url('hotel/edit/' . $hotel['id']) ?>"
+                                  class="btn btn-sm btn-primary py-1 px-3">view</a>
 
-                                            <form action="<?= base_url('hotel/delete') ?>"
-                                                  method="POST"
-                                                  onsubmit="return confirm('Are you sure you want to delete this hotel?');"
+                                            <form class="delete-form"  data-confirm="Are you sure you want to delete this hotel?" action="<?= base_url('hotel/delete') ?>"
                                                   class="m-0">
                                                 <?= csrf_field() ?>
                                                 <input type="hidden" name="id" value="<?= esc($hotel['id']) ?>">

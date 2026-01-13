@@ -145,7 +145,8 @@ class RoomsController extends BaseController
         'max_guests'  => $this->request->getPost('max_guests'),
         'status'      => $this->request->getPost('status'),
     ];
-
+// dd($data);
+// exit();
     if ($this->roomModel->update($id, $data)) {
         return $this->response->setJSON([
             'status'  => 'success',
@@ -162,21 +163,35 @@ class RoomsController extends BaseController
      * Delete (soft delete) room
      */
     public function delete()
-    {
-        $id = (int) $this->request->getPost('id');
-
-        if (!$id) {
-            $this->session->setFlashdata('error', 'Invalid room ID!');
-            return redirect()->to(base_url('rooms'));
-        }
-
-        try {
-            $this->roomModel->softDeleteRoom($id);
-            $this->session->setFlashdata('success', 'Room deleted successfully!');
-        } catch (\Exception $e) {
-            $this->session->setFlashdata('error', 'Something went wrong!');
-        }
-
-        return redirect()->to(base_url('rooms'));
+{
+    if (! $this->request->isAJAX()) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request'
+        ]);
     }
+
+    $id = $this->request->getPost('id');
+
+    if (! $id) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'room ID missing'
+        ]);
+    }
+
+
+
+    if ($this->roomModel->softDeleteRoom($id)) {
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Room deleted successfully'
+        ]);
+    }
+
+    return $this->response->setJSON([
+        'status' => 'error',
+        'message' => 'Delete failed'
+    ]);
+}
 }

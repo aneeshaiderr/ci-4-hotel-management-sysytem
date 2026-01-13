@@ -27,6 +27,6 @@
     </div>
   </div>
 </footer>
-
+ <?= view('dashPartial/main') ?>
 </body>
 </html>

@@ -144,28 +144,60 @@ class DiscountController extends BaseController
     /**
      * Soft delete discount
      */
-   public function delete()
+//    public function delete()
+// {
+//     // Only allow POST requests
+//     if ($this->request->getMethod() == 'post') {
+//         return redirect()->to('/discount');
+//     }
+
+//     $id = $this->request->getPost('id');
+
+//     if (! $id) {
+//         return redirect()->to('/discount')
+//             ->with('error', 'Invalid Discount ID');
+//     }
+
+//     // Soft delete using the model
+//     $this->discountModel->softDeleteDiscount($id
+
+// );
+
+//     return redirect()->to('/discount')
+//         ->with('success', 'Discount deleted successfully!');
+// }
+
+  public function delete()
 {
-    // Only allow POST requests
-    if ($this->request->getMethod() == 'post') {
-        return redirect()->to('/discount');
+    if (! $this->request->isAJAX()) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request'
+        ]);
     }
 
     $id = $this->request->getPost('id');
 
     if (! $id) {
-        return redirect()->to('/discount')
-            ->with('error', 'Invalid Discount ID');
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Discount ID missing'
+        ]);
     }
 
-    // Soft delete using the model
-    $this->discountModel->softDeleteDiscount($id
 
-);
 
-    return redirect()->to('/discount')
-        ->with('success', 'Discount deleted successfully!');
+    if ($this->discountModel->softDeleteDiscount($id)) {
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Discount deleted successfully'
+        ]);
+    }
+
+    return $this->response->setJSON([
+        'status' => 'error',
+        'message' => 'Delete failed'
+    ]);
 }
-
 
 }

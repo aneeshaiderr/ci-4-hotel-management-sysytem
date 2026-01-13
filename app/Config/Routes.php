@@ -11,6 +11,7 @@ $routes->get('about', 'About::index');
 $routes->get('room', 'Room::index');
 $routes->get('news', 'News::index');
 $routes->get('contact', 'Contact::index');
+$routes->get('services/ajaxList', 'ServiceController::ajaxList');
 
     $routes->get('services', 'ServiceController::index');
       $routes->get('services/create', 'ServiceController::create');

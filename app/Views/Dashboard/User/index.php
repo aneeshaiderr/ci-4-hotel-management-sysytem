@@ -36,25 +36,20 @@
                                                <td><?= esc($user['username']) ?></td>
                                                <td> <?= isset($user['first_name']) ? esc($user['first_name']) : '' ?></td>
                                                 <td><?= esc($user['last_name']) ?></td>
-
-
-
                                                 <td><?= isset($user['email']) ? esc($user['email']) : '' ?></td>
 
                                                 <td>
                                                     <div class="d-flex gap-1">
-                                                   <a href="<?= base_url('user/edit/' . $user['id']) ?>" class="btn btn-sm btn-primary">
-    Edit
-</a>
+                                                   <a href="<?= base_url('user/edit/' . $user['id']) ?>" class="btn btn-sm btn-primary">Edit</a>
                                                     <!-- Delete Button (uses POST form) -->
-<form action="<?= base_url('user/delete') ?>" method="post" style="display:inline-block;"
-      onsubmit="return confirm('Are you sure you want to delete this user?');">
-    <?= csrf_field() ?>
-    <input type="hidden" name="id" value="<?= esc($user['id']) ?>">
-    <button type="submit" class="btn btn-sm btn-danger">
-        Delete
-    </button>
-</form>                                    </td>
+                                                  <form action="<?= base_url('user/delete') ?>" class="delete-form"  data-confirm="Are you sure you want to delete this user?" style="display:inline-block;">
+                                                    <?= csrf_field() ?>
+                                                  <input type="hidden" name="id" value="<?= esc($user['id']) ?>">
+                                                  <button type="submit" class="btn btn-sm btn-danger">
+                                                      Delete
+                                                  </button>
+                                              </form>
+                                            </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -151,40 +146,3 @@
 
 </div>
 
-<!-- Hidden Delete Form -->
-<form id="deleteForm" method="POST" action="<?= base_url('user/softDelete') ?>" style="display:none;">
-    <?= csrf_field() ?>
-    <input type="hidden" name="_method" value="DELETE">
-    <input type="hidden" name="id" id="deleteId">
-</form>
-
-<script>
-function submitDelete(id) {
-    if(confirm('Are you sure you want to delete this user?')) {
-        document.getElementById('deleteId').value = id;
-        document.getElementById('deleteForm').submit();
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-
-    const container = document.querySelector('.mb-3');
-
-    if(container) {
-
-        const helloBtn = document.createElement('button');
-
-
-        helloBtn.textContent = 'Say ';
-        helloBtn.className = 'btn btn-sm btn-info ms-2';
-
-
-        helloBtn.addEventListener('click', function() {
-            alert('Hello');
-        });
-
-
-        container.appendChild(helloBtn);
-    }
-});
-</script>

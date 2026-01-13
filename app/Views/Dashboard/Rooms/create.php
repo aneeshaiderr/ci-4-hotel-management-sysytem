@@ -4,58 +4,92 @@
             <div class="mx-auto max-w-4xl py-7 px-7">
                 <h2 class="mb-4">Create Room</h2>
 
-                <!-- CI4 form action -->
-                <form method="POST" id="createRoomForm">
+                <?= form_open('', ['id' => 'createRoomForm']) ?>
                     <?= csrf_field() ?>
 
+                    <!-- Room Number -->
                     <div class="mb-4">
-                        <label for="room_number">Room Number</label>
-                        <input type="number" id="room_number" name="room_number" class="form-control" required>
+                        <?= form_label('Room Number', 'room_number') ?>
+                        <?= form_input([
+                            'type' => 'number',
+                            'id' => 'room_number',
+                            'name' => 'room_number',
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
+                    <!-- Floor -->
                     <div class="mb-4">
-                        <label for="floor">Floor</label>
-                        <input type="number" id="floor" name="floor" class="form-control" required>
+                        <?= form_label('Floor', 'floor') ?>
+                        <?= form_input([
+                            'type' => 'number',
+                            'id' => 'floor',
+                            'name' => 'floor',
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
+                    <!-- Beds -->
                     <div class="mb-4">
-                        <label for="beds">Beds</label>
-                        <input type="number" id="beds" name="beds" class="form-control" required>
+                        <?= form_label('Beds', 'beds') ?>
+                        <?= form_input([
+                            'type' => 'number',
+                            'id' => 'beds',
+                            'name' => 'beds',
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
+                    <!-- Max Guests -->
                     <div class="mb-4">
-                        <label for="max_guests">Max Guests</label>
-                        <input type="number" id="max_guests" name="max_guests" class="form-control" required>
+                        <?= form_label('Max Guests', 'max_guests') ?>
+                        <?= form_input([
+                            'type' => 'number',
+                            'id' => 'max_guests',
+                            'name' => 'max_guests',
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
                     <!-- Hotel Select -->
                     <div class="mb-4 position-relative">
-                        <label for="hotelSearch" class="form-label fw-semibold">Select Hotel</label>
-                        <input type="text" class="form-control" id="hotelSearch" placeholder="Search or Select Hotel..." autocomplete="off">
-                        <input type="hidden" name="hotel_id" id="hotel_id">
+                        <?= form_label('Select Hotel', 'hotelSearch', ['class' => 'form-label fw-semibold']) ?>
+                        <?= form_input([
+                            'type' => 'text',
+                            'class' => 'form-control',
+                            'id' => 'hotelSearch',
+                            'placeholder' => 'Search or Select Hotel...',
+                            'autocomplete' => 'off'
+                        ]) ?>
+                        <?= form_hidden('hotel_id',  ['id' => 'hotel_id']) ?>
 
                         <ul class="list-group position-absolute w-100 shadow-sm mt-1" id="hotelList" style="display:none; max-height:200px; overflow-y:auto; z-index:1050;"></ul>
                     </div>
 
+                    <!-- Status -->
                     <div class="mb-4">
-                        <label for="status">Status</label>
-                        <select id="status" name="status" class="form-control" required>
-                            <option value="available">Available</option>
-                            <option value="booked">Booked</option>
-                            <option value="maintenance">Maintenance</option>
-                        </select>
+                        <?= form_label('Status', 'status') ?>
+                        <?= form_dropdown('status', [
+                            'available' => 'Available',
+                            'booked' => 'Booked',
+                            'maintenance' => 'Maintenance'
+                        ], 'available', ['id' => 'status', 'class' => 'form-control', 'required' => true]) ?>
                     </div>
 
+                    <!-- Buttons -->
                     <div class="mt-6 flex items-center justify-end gap-x-4">
                         <a href="<?= base_url('rooms') ?>" class="btn btn-secondary">Cancel</a>
-                        <button type="submit"
-                                class="btn"
-                                style="background-color:#16a34a; color:white; padding:8px 16px; border-radius:6px; border:none;">
-                            Create
-                        </button>
+                        <?= form_submit('submit', 'Create', [
+                            'class' => 'btn',
+                            'style' => 'background-color:#16a34a; color:white; padding:8px 16px; border-radius:6px; border:none;'
+                        ]) ?>
                     </div>
 
-                </form>
+                <?= form_close() ?>
             </div>
         </main>
     </div>
@@ -74,13 +108,11 @@ $(function(){
   const $input = $('#hotelSearch');
   const $list = $('#hotelList');
 
-  // Show all hotels on click
   $input.on('focus click', () => {
     $list.empty().show();
     hotels.forEach(h => $list.append(`<li class="list-group-item list-group-item-action" data-id="${h.id}">${h.hotel_name}</li>`));
   });
 
-  // Filter on typing
   $input.on('input', function(){
     const query = this.value.toLowerCase();
     $list.empty();
@@ -90,24 +122,22 @@ $(function(){
     $list.toggle($list.children().length > 0);
   });
 
-  // Select hotel
   $list.on('click', 'li', function(){
     $input.val($(this).text());
     $('#hotel_id').val($(this).data('id'));
     $list.hide();
   });
 
-  // Hide list on outside click
   $(document).on('click', e => {
     if (!$(e.target).closest('.mb-4').length) $list.hide();
   });
 });
 
 $(function () {
-
     $('#createRoomForm').on('submit', function (e) {
-        e.prevensstDefault();
-       console.log ($(this).serialize());
+        e.preventDefault();
+        console.log($(this).serialize());
+
         $.ajax({
             url: "<?= base_url('room/store') ?>",
             type: "POST",
@@ -115,13 +145,12 @@ $(function () {
             dataType: "json",
 
             beforeSend: function () {
-                $('button[type="submit"]').prop('disabled', true).text('Saving...');
+                $('button[type="submit"], input[type="submit"]').prop('disabled', true).text('Saving...');
             },
 
             success: function (response) {
                 if (response.status === 'success') {
                     alert(response.message);
-
                     $('#createRoomForm')[0].reset();
                     $('#hotelSearch').val('');
                     $('#hotel_id').val('');
@@ -136,10 +165,9 @@ $(function () {
             },
 
             complete: function () {
-                $('button[type="submit"]').prop('disabled', false).text('Create');
+                $('button[type="submit"], input[type="submit"]').prop('disabled', false).text('Create');
             }
         });
     });
-
 });
 </script>

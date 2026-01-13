@@ -167,22 +167,53 @@ class UserController extends BaseController
 
 
   // Soft delete user
-public function delete()
+// public function delete()
+// {
+//     $id = (int) $this->request->getPost('id');
+
+//     if (!$id) {
+//         return redirect()->back()->with('error', 'Invalid user ID');
+//     }
+
+//     $deleted = $this->userModel->softDeleteUser($id);
+
+//     if ($deleted) {
+//         return redirect()->to('/user')
+//             ->with('success', 'User deleted successfully (soft delete).');
+//     }
+
+//     return redirect()->back()->with('error', 'Failed to delete user');
+// }
+      public function delete()
 {
-    $id = (int) $this->request->getPost('id');
-
-    if (!$id) {
-        return redirect()->back()->with('error', 'Invalid user ID');
+    if (! $this->request->isAJAX()) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request'
+        ]);
     }
 
-    $deleted = $this->userModel->softDeleteUser($id);
+    $id = $this->request->getPost('id');
 
-    if ($deleted) {
-        return redirect()->to('/user')
-            ->with('success', 'User deleted successfully (soft delete).');
+    if (! $id) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'user ID missing'
+        ]);
     }
 
-    return redirect()->back()->with('error', 'Failed to delete user');
+
+
+    if ( $this->userModel->softDeleteUser($id)) {
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'User deleted successfully'
+        ]);
+    }
+
+    return $this->response->setJSON([
+        'status' => 'error',
+        'message' => 'Delete failed'
+    ]);
 }
-
 }

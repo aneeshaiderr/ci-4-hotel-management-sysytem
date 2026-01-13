@@ -1,3 +1,4 @@
+
 <div class="main-content d-flex flex-column min-vh-100">
     <div class="container py-5">
         <main>
@@ -5,7 +6,7 @@
 
                 <h5 class="fw-bold mb-4">Edit Room</h5>
 
-                <form method="POST" id="editRoomForm" >
+                <form method="POST" id="editRoomForm"  >
                     <?= csrf_field() ?>
 
                     <input type="hidden" name="id" value="<?= (int) $room['id'] ?>">
@@ -70,7 +71,7 @@
         </main>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 <script>
 $(function () {

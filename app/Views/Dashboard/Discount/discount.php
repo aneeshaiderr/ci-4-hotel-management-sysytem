@@ -76,10 +76,9 @@
 
                                             ?>
                                             <?php if($user->can('discount.delete')): ?>
-                                                <form action="<?= base_url('discount/delete') ?>"
-                                                      method="post"
-                                                      class="m-0"
-                                                      onsubmit="return confirm('Are you sure you want to delete this discount?');">
+                                                <form class="delete-form" action="<?= base_url('discount/delete') ?>" data-confirm="Are you sure you want to delete this discount?"
+
+                                                      class="m-0">
                                                     <?= csrf_field() ?>
                                                     <input type="hidden" name="id" value="<?= esc($discount['id']) ?>">
                                                     <button type="submit"
@@ -108,3 +107,17 @@
         </div>
     </div>
 </div>
+<script>
+$(document).ready(function () {
+
+    var table = $('#example').DataTable({
+        pageLength: 4,
+        lengthChange: false,
+        ordering: true,
+        searching: true
+    });
+
+
+        });
+
+</script>

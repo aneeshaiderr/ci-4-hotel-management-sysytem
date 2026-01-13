@@ -134,20 +134,36 @@ public function store()
     /**
      * Soft delete hotel
      */
-    public function delete()
-    {
-        $request = Services::request();
-
-        $id = $request->getPost('id');
-
-        if (!$id) {
-            $this->session->setFlashdata('error', 'Invalid hotel ID!');
-            return redirect()->to('/hotel');
-        }
-
-        $this->hotelModel->softDeleteHotel($id);
-        $this->session->setFlashdata('success', 'Hotel deleted successfully!');
-
-        return redirect()->to('/hotel');
+      public function delete()
+{
+    if (! $this->request->isAJAX()) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request'
+        ]);
     }
+
+    $id = $this->request->getPost('id');
+
+    if (! $id) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'hotel ID missing'
+        ]);
+    }
+
+
+
+    if ( $this->hotelModel->softDeleteHotel($id)) {
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Hotel deleted successfully'
+        ]);
+    }
+
+    return $this->response->setJSON([
+        'status' => 'error',
+        'message' => 'Delete failed'
+    ]);
+}
 }

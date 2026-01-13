@@ -107,7 +107,6 @@
 
 <script>
 $(function() {
-
     $('#createDiscountForm').on('submit', function(e) {
         e.preventDefault();
 

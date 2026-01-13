@@ -62,16 +62,16 @@
                                                 View
                                             </a>
 
-                                            <!-- Delete -->
-                                            <form class="delete-form">
-        <?= csrf_field() ?>
-        <input type="hidden" name="id" value="<?= esc($service['id']) ?>">
 
-        <button type="submit"
-                class="btn btn-sm btn-danger py-1 px-3 btn-delete">
-            Delete
-        </button>
-    </form>
+
+                                            <!-- Delete -->
+                                            <form class="delete-form" action="<?= base_url('services/delete') ?>" data-confirm="Are you sure you want to delete this service?">
+                                            <?= csrf_field() ?>
+                                        <input type="hidden" name="id" value="<?= esc($service['id']) ?>">
+
+                                        <button type="submit"
+                                       class="btn btn-sm btn-danger py-1 px-3 btn-delete">Delete</button>
+                                          </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -90,45 +90,3 @@
         </div>
     </div>
 </div>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    document.querySelectorAll('.delete-form').forEach(form => {
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            if (!confirm('Are you sure you want to delete this service?')) {
-                return;
-            }
-
-            const formData = new FormData(form);
-
-            fetch("<?= base_url('services/delete') ?>", {
-                method: "POST",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest"
-                },
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    form.closest('tr').remove();
-                    alert(data.message);
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Something went wrong!');
-            });
-
-        });
-
-    });
-
-});
-</script>
-
