@@ -1,4 +1,3 @@
-
 <div class="main-content d-flex flex-column min-vh-100">
     <div class="container py-5">
         <main>
@@ -6,72 +5,97 @@
 
                 <h5 class="fw-bold mb-4">Edit Room</h5>
 
-                <form method="POST" id="editRoomForm"  >
+                <?= form_open('', ['id' => 'editRoomForm']) ?>
                     <?= csrf_field() ?>
 
-                    <input type="hidden" name="id" value="<?= (int) $room['id'] ?>">
+                    <?= form_hidden('id', (string)$room['id']) ?>
 
                     <!-- Room Number -->
                     <div class="mb-4">
-                        <label for="room_number">Room Number</label>
-                        <input type="number" id="room_number" name="room_number"
-                               value="<?= (int) $room['room_number'] ?>" required
-                               class="form-control">
+                        <?= form_label('Room Number', 'room_number') ?>
+                        <?= form_input([
+                            'type' => 'number',
+                            'id' => 'room_number',
+                            'name' => 'room_number',
+                            'value' => (string)$room['room_number'],
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
                     <!-- Floor -->
                     <div class="mb-4">
-                        <label for="floor">Floor</label>
-                        <input type="number" id="floor" name="floor"
-                               value="<?= (int) $room['floor'] ?>" required
-                               class="form-control">
+                        <?= form_label('Floor', 'floor') ?>
+                        <?= form_input([
+                            'type' => 'number',
+                            'id' => 'floor',
+                            'name' => 'floor',
+                            'value' => (string)$room['floor'],
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
-                    <!-- Room Bed -->
+                    <!-- Beds -->
                     <div class="mb-4">
-                        <label for="beds">Beds</label>
-                        <input type="number" id="beds" name="beds"
-                               value="<?= (int) $room['beds'] ?>" required
-                               class="form-control">
+                        <?= form_label('Beds', 'beds') ?>
+                        <?= form_input([
+                            'type' => 'number',
+                            'id' => 'beds',
+                            'name' => 'beds',
+                            'value' => (string)$room['beds'],
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
                     <!-- Max Guests -->
                     <div class="mb-4">
-                        <label for="max_guests">Max Guests</label>
-                        <input type="number" id="max_guests" name="max_guests"
-                               value="<?= (int) $room['max_guests'] ?>" required
-                               class="form-control">
+                        <?= form_label('Max Guests', 'max_guests') ?>
+                        <?= form_input([
+                            'type' => 'number',
+                            'id' => 'max_guests',
+                            'name' => 'max_guests',
+                            'value' => (string)$room['max_guests'],
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
                     <!-- Status -->
                     <div class="mb-4">
-                        <label for="status">Status</label>
-                        <select id="status" name="status" class="form-control" required>
-                            <option value="available" <?= $room['status'] === 'available' ? 'selected' : '' ?>>Available</option>
-                            <option value="booked" <?= $room['status'] === 'booked' ? 'selected' : '' ?>>Booked</option>
-                            <option value="maintenance" <?= $room['status'] === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
-                        </select>
+                        <?= form_label('Status', 'status') ?>
+                        <?= form_dropdown('status', [
+                            'available' => 'Available',
+                            'booked' => 'Booked',
+                            'maintenance' => 'Maintenance'
+                        ], (string)$room['status'], [
+                            'id' => 'status',
+                            'class' => 'form-control',
+                            'required' => true
+                        ]) ?>
                     </div>
 
                     <!-- Buttons -->
                     <div class="mt-6 d-flex justify-content-end gap-2">
                         <a href="<?= base_url('rooms') ?>" class="btn btn-secondary">Cancel</a>
-                        <button type="submit"
-                          id="updateBtn"
-                                class="btn btn-success"
-                                style="background-color:#16a34a;"
-                                onmouseover="this.style.backgroundColor='#15803d'"
-                                onmouseout="this.style.backgroundColor='#16a34a'">
-                            Update
-                        </button>
+                        <?= form_submit('submit', 'Update', [
+                            'id' => 'updateBtn',
+                            'class' => 'btn btn-success',
+                            'style' => 'background-color:#16a34a;',
+                            'onmouseover' => "this.style.backgroundColor='#15803d'",
+                            'onmouseout'  => "this.style.backgroundColor='#16a34a'"
+                        ]) ?>
                     </div>
 
-                </form>
+                <?= form_close() ?>
+
             </div>
         </main>
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
 $(function () {
@@ -90,6 +114,7 @@ $(function () {
             beforeSend: function () {
                 $('#updateBtn')
                     .prop('disabled', true)
+                    .val('Updating...')
                     .text('Updating...');
             },
 
@@ -114,6 +139,7 @@ $(function () {
             complete: function () {
                 $('#updateBtn')
                     .prop('disabled', false)
+                    .val('Update')
                     .text('Update');
             }
         });

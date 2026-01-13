@@ -10,7 +10,7 @@
                 <?php
                 // CI4 Form Builder
                 echo form_open('', ['id' => 'createServiceForm']);
-                echo csrf_field(); // CSRF token
+                echo csrf_field(); 
                 ?>
 
                 <!-- Service Name -->
