@@ -17,76 +17,91 @@
 
                 <h6 class="mb-3 fw-bold">Service List</h6>
 
-                <table id="example" class="table table-striped table-bordered align-middle">
+                <table id="example" class="table table-striped table-bordered align-middle w-100">
                     <thead class="table-light">
                         <tr>
-                            <th>Service ID</th>
+                            <th>ID</th>
                             <th>Service Name</th>
                             <th>Price</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
-
-                    <tbody>
-                        <?php if (!empty($services)) : ?>
-                            <?php foreach ($services as $service) : ?>
-                                <tr>
-                                    <td><?= esc($service['id']) ?></td>
-                                    <td><?= esc($service['service_name']) ?></td>
-                                    <td>$<?= esc($service['price']) ?></td>
-
-                                    <!-- Status -->
-                                    <td>
-                                        <?php
-                                            $status = strtolower($service['status']);
-                                        ?>
-                                        <?php if ($status === 'active') : ?>
-                                            <span class="badge bg-success">Active</span>
-                                        <?php elseif ($status === 'inactive') : ?>
-                                            <span class="badge bg-danger">Inactive</span>
-                                        <?php else : ?>
-                                            <span class="badge bg-warning text-dark">
-                                                <?= esc($service['status']) ?>
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-
-                                    <!-- Actions -->
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-
-                                            <!-- View / Edit -->
-                                            <a href="<?= base_url('services/edit/' . $service['id']) ?>"
-                                               class="btn btn-sm btn-primary py-1 px-3">
-                                                View
-                                            </a>
-
-
-
-                                            <!-- Delete -->
-                                            <form class="delete-form" action="<?= base_url('services/delete') ?>" data-confirm="Are you sure you want to delete this service?">
-                                            <?= csrf_field() ?>
-                                        <input type="hidden" name="id" value="<?= esc($service['id']) ?>">
-
-                                        <button type="submit"
-                                       class="btn btn-sm btn-danger py-1 px-3 btn-delete">Delete</button>
-                                          </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else : ?>
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    No services found
-                                </td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-
+                    <tbody></tbody>
                 </table>
+
             </div>
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function () {
+
+    $('#example').DataTable({
+        processing: true,
+        serverSide: true,
+        pageLength: 5,
+        lengthChange: false,
+
+        ajax: {
+            url: "<?= base_url('services') ?>",
+            type: "POST"
+        },
+
+        columns: [
+            { data: 'id' },
+            { data: 'service_name' },
+            {
+                data: 'price',
+                render: function (data) {
+                    return '$' + data;
+                }
+            },
+            {
+                data: 'status',
+                render: function (status) {
+                    status = status.toLowerCase();
+                    if (status === 'active') {
+                        return '<span class="badge bg-success">Active</span>';
+                    }
+                    if (status === 'inactive') {
+                        return '<span class="badge bg-danger">Inactive</span>';
+                    }
+                    return '<span class="badge bg-warning text-dark">' + status + '</span>';
+                }
+            },
+            {
+                data: 'id',
+                orderable: false,
+                searchable: false,
+                render: function (id) {
+                    return `
+                        <div class="d-flex align-items-center gap-1">
+                            <a href="<?= base_url('services/edit') ?>/${id}"
+                               class="btn btn-sm btn-primary">
+                                View
+                            </a>
+
+                            <form method="post"
+                                  action="<?= base_url('services/delete') ?>"
+                                  onsubmit="return confirm('Are you sure you want to delete this service?')"
+                                  class="m-0">
+
+                                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
+                                <input type="hidden" name="id" value="${id}">
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    `;
+                }
+            }
+        ]
+    });
+
+});
+</script>

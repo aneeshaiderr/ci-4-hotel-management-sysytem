@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\DiscountModel;
 use Config\Services;
-
+use App\Helpers\DataTableHelper;
 class DiscountController extends BaseController
 {
     protected $discountModel;
@@ -24,12 +24,40 @@ class DiscountController extends BaseController
      */
     public function index()
     {
-        $discounts = $this->discountModel->getAllDiscounts();
-        return $this->render('Dashboard/Discount/discount', [
-            'discounts' => $discounts
-        ]);
-    }
 
+        return $this->render('Dashboard/Discount/discount');
+    }
+public function datatable()
+{
+    $dt = new DataTableHelper($this->request);
+
+    $columns = [
+        'id',
+        'discount_type',
+        'discount_name',
+        'value',
+        'start_date',
+        'end_date',
+        'status'
+    ];
+
+    $params = $dt->getParams($columns);
+
+    $data = $this->discountModel->getDiscounts(
+        $params['length'],
+        $params['start'],
+        $params['search'],
+        $params['orderColumn'],
+        $params['orderDir']
+    );
+
+    return $this->response->setJSON([
+        'draw'            => $params['draw'],
+        'recordsTotal'    => $this->discountModel->countAll(),
+        'recordsFiltered' => $this->discountModel->countFiltered($params['search']),
+        'data'            => $data
+    ]);
+}
     /**
      * Show create discount form
      */
@@ -144,28 +172,7 @@ class DiscountController extends BaseController
     /**
      * Soft delete discount
      */
-//    public function delete()
-// {
-//     // Only allow POST requests
-//     if ($this->request->getMethod() == 'post') {
-//         return redirect()->to('/discount');
-//     }
 
-//     $id = $this->request->getPost('id');
-
-//     if (! $id) {
-//         return redirect()->to('/discount')
-//             ->with('error', 'Invalid Discount ID');
-//     }
-
-//     // Soft delete using the model
-//     $this->discountModel->softDeleteDiscount($id
-
-// );
-
-//     return redirect()->to('/discount')
-//         ->with('success', 'Discount deleted successfully!');
-// }
 
   public function delete()
 {

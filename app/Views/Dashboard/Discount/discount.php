@@ -13,7 +13,7 @@
             <div class="card-body">
                 <h6 class="mb-3 fw-bold">Discount List</h6>
 
-                <table id="example" class="table table-striped table-bordered align-middle">
+                <table id="example" class="table table-striped table-bordered align-middle w-100">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
@@ -26,98 +26,73 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-
-                    <tbody>
-                        <?php if (!empty($discounts)) : ?>
-                            <?php foreach ($discounts as $discount) : ?>
-                                <tr>
-                                    <td><?= esc($discount['id']) ?></td>
-                                    <td><?= esc($discount['discount_type'] ?? '') ?></td>
-                                    <td><?= esc($discount['discount_name'] ?? '') ?></td>
-                                    <td><?= esc($discount['value'] ?? '') ?></td>
-                                    <td><?= esc($discount['start_date'] ?? '') ?></td>
-                                    <td><?= esc($discount['end_date'] ?? '') ?></td>
-
-                                    <td>
-                                        <?php
-                                            $status = strtolower($discount['status'] ?? '');
-                                        ?>
-                                        <?php if ($status === 'active') : ?>
-                                            <span class="badge bg-success">Active</span>
-                                        <?php elseif ($status === 'inactive') : ?>
-                                            <span class="badge bg-danger">Inactive</span>
-                                        <?php else : ?>
-                                            <span class="badge bg-warning text-dark">
-                                                <?= esc($discount['status'] ?? 'Unknown') ?>
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <a href="<?= base_url('discount/edit/' . $discount['id']) ?>"
-                                               class="btn btn-sm btn-primary py-1 px-3">
-                                                View
-                                            </a>
-
-
-
-
-                                            <?php
-
-                                            $auth = auth();
-
-
-                                            // Check if a user is logged in
-                                            if ($user = $auth->user()) {
-                                                $currentUser = $user;
-
-                                            }
-
-                                            ?>
-                                            <?php if($user->can('discount.delete')): ?>
-                                                <form class="delete-form" action="<?= base_url('discount/delete') ?>" data-confirm="Are you sure you want to delete this discount?"
-
-                                                      class="m-0">
-                                                    <?= csrf_field() ?>
-                                                    <input type="hidden" name="id" value="<?= esc($discount['id']) ?>">
-                                                    <button type="submit"
-                                                            class="btn btn-sm btn-danger py-1 px-3">
-                                                        Delete
-                                                    </button>
-                                                </form>
-                                            <?php
-                                             endif;
-                                            ?>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else : ?>
-                            <tr>
-                                <td colspan="8" class="text-center text-muted">
-                                    No discounts found
-                                </td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
 
             </div>
         </div>
     </div>
 </div>
+
 <script>
 $(document).ready(function () {
 
-    var table = $('#example').DataTable({
-        pageLength: 4,
+    $('#example').DataTable({
+        processing: true,
+        serverSide: true,
+        pageLength: 5,
         lengthChange: false,
-        ordering: true,
-        searching: true
+
+        ajax: {
+            url: "<?= base_url('discount') ?>",
+            type: "POST"
+        },
+
+        columns: [
+            { data: 'id' },
+            { data: 'discount_type' },
+            { data: 'discount_name' },
+            { data: 'value' },
+            { data: 'start_date' },
+            { data: 'end_date' },
+            {
+                data: 'status',
+                render: function (data) {
+                    data = data.toLowerCase();
+                    if (data === 'active') return '<span class="badge bg-success">Active</span>';
+                    if (data === 'inactive') return '<span class="badge bg-danger">Inactive</span>';
+                    return '<span class="badge bg-warning text-dark">'+data+'</span>';
+                }
+            },
+            {
+                data: 'id',
+                orderable: false,
+                searchable: false,
+                render: function (id) {
+                    return `
+                        <div class="d-flex gap-1">
+                            <a href="<?= base_url('discount/edit') ?>/${id}"
+                               class="btn btn-sm btn-primary">View</a>
+
+                            <form method="post"
+                                  action="<?= base_url('discount/delete') ?>"
+                                  class="d-inline"
+                                  onsubmit="return confirm('Are you sure?')">
+
+                                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
+                                <input type="hidden" name="id" value="${id}">
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    `;
+                }
+            }
+        ]
     });
 
-
-        });
-
+});
 </script>

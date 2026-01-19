@@ -49,11 +49,41 @@ class HotelModel extends Model
     protected $afterDelete    = [];
 
 
-     public function getAllHotels()
+   public function getHotels($limit, $offset, $search, $orderColumn, $orderDir)
     {
-        return $this->where('deleted_at', null)
-                    ->orderBy('id')
-                    ->findAll();
+        $builder = $this->where('deleted_at', null);
+
+        if ($search) {
+            $builder->groupStart()
+                    ->like('hotel_name', $search)
+                    ->orLike('address', $search)
+                    ->orLike('contact_no', $search)
+                    ->groupEnd();
+        }
+
+        return $builder
+                ->orderBy($orderColumn, $orderDir)
+                ->findAll($limit, $offset);
+    }
+
+    public function countAllHotels()
+    {
+        return $this->where('deleted_at', null)->countAllResults();
+    }
+
+    public function countFilteredHotels($search)
+    {
+        $builder = $this->where('deleted_at', null);
+
+        if ($search) {
+            $builder->groupStart()
+                    ->like('hotel_name', $search)
+                    ->orLike('address', $search)
+                    ->orLike('contact_no', $search)
+                    ->groupEnd();
+        }
+
+        return $builder->countAllResults();
     }
 
     /**

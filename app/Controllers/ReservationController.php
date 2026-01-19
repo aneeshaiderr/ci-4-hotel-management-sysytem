@@ -9,7 +9,7 @@ use App\Models\RoomModel;
 use App\Models\DiscountModel;
 use App\Models\UserInfoModel;
 use App\Controllers\BaseController;
-
+use App\Helpers\DataTableHelper;
 class ReservationController extends BaseController
 {
     protected $reservationModel;
@@ -34,16 +34,34 @@ class ReservationController extends BaseController
     /** List all reservations */
     public function index()
     {
-        $userId = $this->session->get('user_id'); // optional filter
-$emails = $this->userInfoModel->getAllEmails();
-        $reservations = $this->reservationModel->getAllReservations($userId);
 
-        return $this->render('Dashboard/Reservation/reservation', [
-            'reservations' => $reservations,
-            'emails' => $emails,
-        ]);
+
+        return $this->render('Dashboard/Reservation/reservation');
     }
+ public function DataTable()
+{
 
+   $dt = new DataTableHelper($this->request);
+
+    $columns = ['id','hotel_code','email','hotel_name','room_id','discount_name','check_in','check_out','status'];
+    $params = $dt->getParams($columns);
+
+    $data = $this->reservationModel->getReservations(
+        $params['start'],
+        $params['length'],
+        $params['search'],
+        $params['orderColumn'],
+        $params['orderDir']
+    );
+
+    $recordsTotal = $this->reservationModel->countAllReservations();
+    return $this->response->setJSON([
+        'draw' => $params['draw'],
+        'recordsTotal' => $recordsTotal,
+        'recordsFiltered' => $data['recordsFiltered'],
+        'data' => $data['data']
+    ]);
+}
     /** Show create reservation form */
     public function create()
     {
@@ -58,7 +76,8 @@ $emails = $this->userInfoModel->getAllEmails();
         ]);
     }
 
-    /** Store reservation */
+
+
     /** Store reservation */
 public function store()
 {
@@ -69,7 +88,7 @@ public function store()
     $validation = \Config\Services::validation();
     $validation->setRules([
         'hotel_code'    => 'required',
-        'user_info_id'  => 'required|numeric',  // foreign key
+        'user_info_id'  => 'required|numeric',
         'hotel_id'      => 'required|numeric',
         'room_id'       => 'required|numeric',
         'discount_id'   => 'permit_empty|numeric',

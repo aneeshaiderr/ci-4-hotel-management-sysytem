@@ -36,26 +36,41 @@ class ReservationModel extends Model
     protected $deletedField  = 'deleted_at';
 
     /** Get all reservations optionally filtered by user */
+ public function getReservations($start = 0, $length = 10, $search = '', $orderColumn = 'r.id', $orderDir = 'ASC')
+    {
+        $builder = $this->db->table('reservation r')
+            ->select('r.id, r.hotel_code, r.room_id, r.check_in, r.check_out, r.status, ui.email AS email, h.hotel_name, d.discount_name')
+            ->join('users u', 'r.user_id = u.id', 'left')
+            ->join('user_info ui', 'r.user_info_id = ui.id', 'left')
+            ->join('hotels h', 'r.hotel_id = h.id', 'left')
+            ->join('discounts d', 'r.discount_id = d.id', 'left')
+            ->where('r.deleted_at', null);
 
-public function getAllReservations($userId = null)
-{
-    $builder = $this->db->table('reservation r')
-        ->select('r.*, ui.email AS email, h.hotel_name, d.discount_name')
-        ->join('users u', 'r.user_id = u.id', 'left')
-        ->join('user_info ui', 'r.user_info_id = ui.id', 'left') // <-- fix here
-        ->join('hotels h', 'r.hotel_id = h.id', 'left')
-        ->join('discounts d', 'r.discount_id = d.id', 'left')
-        ->where('r.deleted_at', null);
+        if (!empty($search)) {
+            $builder->groupStart()
+                    ->like('r.hotel_code', $search)
+                    ->orLike('ui.email', $search)
+                    ->orLike('h.hotel_name', $search)
+                    ->orLike('d.discount_name', $search)
+                    ->groupEnd();
+        }
 
-    if ($userId !== null) {
-        $builder->where('r.user_id', $userId);
+        $totalFiltered = $builder->countAllResults(false);
+
+        $data = $builder->orderBy($orderColumn, $orderDir)
+                        ->limit($length, $start)
+                        ->get()
+                        ->getResultArray();
+
+        return ['data' => $data, 'recordsFiltered' => $totalFiltered];
     }
 
-    $builder->orderBy('r.id');
-
-    return $builder->get()->getResultArray();
-}
-
+    public function countAllReservations()
+    {
+        return $this->db->table('reservation')
+            ->where('deleted_at', null)
+            ->countAllResults();
+    }
 /** Get reservation by ID */
 public function getReservationById($id)
 {

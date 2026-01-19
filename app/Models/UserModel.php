@@ -22,16 +22,57 @@ class UserModel extends Model
     /**
      * Get all users with auth_logins info (status + identifier)
      */
- public function getAllUsers(): array
-{
-    return $this->db->table('users u')
-        ->select('u.id, u.username, ui.first_name, ui.last_name, ui.email, ui.contact_no')
-        ->join('user_info ui', 'ui.user_id = u.id', 'left')
-        ->where('u.deleted_at', null) // Only non-deleted users
-        ->orderBy('u.id', 'ASC')
-        ->get()
-        ->getResultArray();
-}
+     // Get users for DataTable (with search, limit, offset)
+    public function getUsers(int $limit, int $offset, string $search = '', string $orderColumn = 'id', string $orderDir = 'ASC'): array
+    {
+        $builder = $this->db->table('users u')
+            ->select('u.id, u.username, ui.first_name, ui.last_name, ui.email, ui.contact_no')
+            ->join('user_info ui', 'ui.user_id = u.id', 'left')
+            ->where('u.deleted_at', null);
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('u.username', $search)
+                ->orLike('ui.first_name', $search)
+                ->orLike('ui.last_name', $search)
+                ->orLike('ui.email', $search)
+                ->groupEnd();
+        }
+
+        $builder->orderBy($orderColumn, $orderDir);
+        return $builder->get($limit, $offset)->getResultArray();
+    }
+
+    public function countAllUsers(): int
+    {
+        return $this->where('deleted_at', null)->countAllResults();
+    }
+
+    public function countFilteredUsers(string $search = ''): int
+    {
+        $builder = $this->db->table('users u')->join('user_info ui', 'ui.user_id = u.id', 'left')->where('u.deleted_at', null);
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('u.username', $search)
+                ->orLike('ui.first_name', $search)
+                ->orLike('ui.last_name', $search)
+                ->orLike('ui.email', $search)
+                ->groupEnd();
+        }
+
+        return $builder->countAllResults();
+    }
+//  public function getAllUsers(): array
+// {
+//     return $this->db->table('users u')
+//         ->select('u.id, u.username, ui.first_name, ui.last_name, ui.email, ui.contact_no')
+//         ->join('user_info ui', 'ui.user_id = u.id', 'left')
+//         ->where('u.deleted_at', null) // Only non-deleted users
+//         ->orderBy('u.id', 'ASC')
+//         ->get()
+//         ->getResultArray();
+// }
 
     /**
      * Create user and save email in user_info table

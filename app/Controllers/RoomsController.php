@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\RoomModel;
 use Config\Services;
+use App\Helpers\DataTableHelper;
 class RoomsController extends BaseController
 {
    public function __construct()
@@ -21,9 +22,46 @@ class RoomsController extends BaseController
      */
     public function index()
     {
-        $rooms = $this->roomModel->getAllRooms();
-        return $this->render('Dashboard/Rooms/room', ['rooms' => $rooms]);
+
+        return $this->render('Dashboard/Rooms/room');
     }
+    public function updateStatus()
+{
+    $id     = $this->request->getPost('id');
+    $status = $this->request->getPost('status');
+
+    $this->roomModel->update($id, [
+        'status' => $status
+    ]);
+
+    return $this->response->setJSON([
+        'status' => 'success'
+    ]);
+}
+
+ public function DataTable()
+{
+    $dt = new DataTableHelper($this->request);
+
+    $columns = ['id','room_number','floor','beds','max_guests','status'];
+
+    $params = $dt->getParams($columns);
+
+    $data = $this->roomModel->getRooms(
+        $params['length'],
+        $params['start'],
+        $params['search'],
+        $params['orderColumn'],
+        $params['orderDir']
+    );
+
+    return $this->response->setJSON([
+        'draw'            => $params['draw'],
+        'recordsTotal'    => $this->roomModel->countAllRooms(),
+        'recordsFiltered' => $this->roomModel->countFilteredRooms($params['search']),
+        'data'            => $data
+    ]);
+}
 
     /**
      * Show create room form
@@ -43,10 +81,7 @@ class RoomsController extends BaseController
    public function store()
 {
 
-    // Check if it's a POST request
-    // if ($this->request->getMethod() == 'post') {
-    //     return redirect()->to(base_url('rooms'));
-    // }
+
  if (!$this->request->isAJAX()) {
         return $this->response->setJSON([
             'status' => 'error',
@@ -145,8 +180,7 @@ class RoomsController extends BaseController
         'max_guests'  => $this->request->getPost('max_guests'),
         'status'      => $this->request->getPost('status'),
     ];
-// dd($data);
-// exit();
+
     if ($this->roomModel->update($id, $data)) {
         return $this->response->setJSON([
             'status'  => 'success',

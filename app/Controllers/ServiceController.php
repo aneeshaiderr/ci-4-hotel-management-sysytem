@@ -1,12 +1,11 @@
 <?php
 
 namespace App\Controllers;
-// use App\Controllers\ServicesController;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\ServiceModel;
 use Config\Services;
-
+use App\Helpers\DataTableHelper;
 class ServiceController extends BaseController
 {
     protected ServiceModel $serviceModel;
@@ -15,7 +14,6 @@ class ServiceController extends BaseController
     {
         $this->serviceModel = new ServiceModel();
 
-        $this->session   = Services::session();
         $this->request   = Services::request();
 
     }
@@ -23,11 +21,39 @@ class ServiceController extends BaseController
 
     public function index()
     {
-        $data['services'] = $this->serviceModel->getAllServicesList();
 
-       return $this->render('Dashboard/Services/services', $data);
+
+       return $this->render('Dashboard/Services/services');
     }
 
+public function DataTable()
+{
+
+    $dt = new DataTableHelper($this->request);
+
+
+
+
+    $columns = ['id','service_name','price','status'];
+
+    $params = $dt->getParams($columns);
+
+    $data = $this->serviceModel->getServices(
+        $params['length'],
+        $params['start'],
+        $params['search'],
+        $params['orderColumn'],
+        $params['orderDir']
+    );
+
+  return $this->response->setJSON([
+        'draw'            => $params['draw'],
+        'recordsTotal'    => $this->serviceModel->countAll(),
+        'recordsFiltered' => $this->serviceModel->countFiltered($params['search']),
+        'data'            => $data
+    ]);
+
+}
 
     public function create()
     {

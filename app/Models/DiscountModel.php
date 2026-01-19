@@ -48,20 +48,40 @@ class DiscountModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-  public function getAllDiscounts()
+public function getDiscounts($limit, $offset, $search, $orderColumn, $orderDir)
 {
-    return $this->select([
-                'id',
-                'discount_type',
-                'discount_name',
-                'value',
-                'start_date',
-                'end_date',
-                'status',
-            ])
-            ->orderBy('start_date', 'ASC')
-            ->findAll();
+    $builder = $this->builder();
+
+    if ($search) {
+        $builder->groupStart()
+                ->like('discount_type', $search)
+                ->orLike('discount_name', $search)
+                ->orLike('status', $search)
+                ->groupEnd();
+    }
+
+    return $builder
+        ->orderBy($orderColumn, $orderDir)
+        ->limit($limit, $offset)
+        ->get()
+        ->getResultArray();
 }
+
+public function countFiltered($search)
+{
+    $builder = $this->builder();
+
+    if ($search) {
+        $builder->groupStart()
+                ->like('discount_type', $search)
+                ->orLike('discount_name', $search)
+                ->orLike('status', $search)
+                ->groupEnd();
+    }
+
+    return $builder->countAllResults();
+}
+
 
     /**
      * Find single discount by ID

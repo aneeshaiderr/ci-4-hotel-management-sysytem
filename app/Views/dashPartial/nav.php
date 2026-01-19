@@ -1,6 +1,6 @@
+
 <div class="overlay"></div>
 <div class="main-container">
-
   <nav class="navbar navbar-expand navbar-light">
 
     <!-- Left Section (Toggle + Search) -->

@@ -4,7 +4,7 @@ use App\Models\HotelModel;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
-
+use App\Helpers\DataTableHelper;
 class HotelController extends BaseController
 {
     protected $hotelModel;
@@ -17,10 +17,33 @@ class HotelController extends BaseController
 
    public function index()
     {
-        $hotels = $this->hotelModel->getAllHotels();
 
-        return $this->render('Dashboard/Hotel/hotel', ['hotels' => $hotels]);
+
+        return $this->render('Dashboard/Hotel/hotel');
     }
+public function DataTable()
+{
+   $dt = new DataTableHelper($this->request);
+
+    $columns = ['id','hotel_name','address','contact_no'];
+  $params = $dt->getParams($columns);
+
+    $data = $this->hotelModel->getHotels(
+        $params['length'],
+        $params['start'],
+        $params['search'],
+        $params['orderColumn'],
+        $params['orderDir']
+    );
+
+ return $this->response->setJSON([
+        'draw'            => $params['draw'],
+        'recordsTotal'    => $this->hotelModel->countAllHotels(),
+        'recordsFiltered' => $this->hotelModel->countFilteredHotels($params['search']),
+        'data'            => $data
+    ]);
+
+}
 
     /**
      * Show create hotel form

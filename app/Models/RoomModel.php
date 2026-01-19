@@ -48,12 +48,45 @@ class RoomModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-    public function getAllRooms()
-    {
-        return $this->where('deleted_at', null)
-                    ->orderBy('id')
-                    ->findAll();
+
+public function getRooms($limit, $offset, $search = '', $orderColumn = 'id', $orderDir = 'ASC')
+{
+    $builder = $this->where('deleted_at', null);
+
+    if ($search !== '') {
+        $builder->groupStart()
+                ->like('room_number', $search)
+                ->orLike('floor', $search)
+                ->orLike('beds', $search)
+                ->orLike('max_guests', $search)
+                ->groupEnd();
     }
+
+     return $builder
+            ->orderBy($orderColumn, $orderDir)
+            ->findAll($limit, $offset);
+}
+
+public function countAllRooms()
+{
+    return $this->where('deleted_at', null)->countAllResults();
+}
+
+public function countFilteredRooms($search = '')
+{
+    $builder = $this->where('deleted_at', null);
+
+    if ($search !== '') {
+        $builder->groupStart()
+                ->like('room_number', $search)
+                ->orLike('floor', $search)
+                ->orLike('beds', $search)
+                ->orLike('max_guests', $search)
+                ->groupEnd();
+    }
+
+    return $builder->countAllResults();
+}
 
     /**
      * Get all rooms including deleted

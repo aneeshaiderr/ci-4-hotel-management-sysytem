@@ -39,11 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 $(function(){
-  const hotels = [
-    <?php foreach ($hotels as $hotel): ?>
-      { id: <?= $hotel['id'] ?>, hotel_name: "<?= addslashes($hotel['hotel_name']) ?>" },
-    <?php endforeach; ?>
-  ];
+  // const hotels = [
+  //   <?php foreach ($hotels as $hotel): ?>
+  //     { id: <?= $hotel['id'] ?>, hotel_name: "<?= addslashes($hotel['hotel_name']) ?>" },
+  //   <?php endforeach; ?>
+  // ];
 
   const $input = $('#hotelSearch');
   const $list = $('#hotelList');

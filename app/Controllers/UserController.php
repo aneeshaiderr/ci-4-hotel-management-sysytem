@@ -6,6 +6,8 @@ use App\Controllers\BaseController;
 use App\Models\UserModel;
 use CodeIgniter\Config\Services;
 use App\Libraries\UserInfoLibrary;
+ use App\Helpers\DataTableHelper;
+
 class UserController extends BaseController
 {
     protected UserModel $userModel;
@@ -19,9 +21,9 @@ class UserController extends BaseController
     {
 
         $user = auth()->user();
- $users = $this->userModel->getAllUsers();
+//  $users = $this->userModel->getAllUsers();
         // Load view
-         return $this->render('Dashboard/User/index', ['users' => $users]);
+         return $this->render('Dashboard/User/index');
 
         if ($user->inGroup('staff'))
              {
@@ -37,6 +39,34 @@ class UserController extends BaseController
                 ->getCurrentReservation($user->id),
         ]);
     }
+
+
+   public function datatable()
+    {
+        $dt = new DataTableHelper($this->request);
+
+
+
+        $columns = ['username','first_name','last_name','email'];
+        $params = $dt->getParams($columns);
+
+    $data =$this->userModel->getUsers(
+        $params['length'],
+        $params['start'],
+        $params['search'],
+        $params['orderColumn'],
+        $params['orderDir']
+    );
+
+    return $this->response->setJSON([
+        'draw'            => $params['draw'],
+        'recordsTotal'    => $this->userModel->countAllUsers(),
+        'recordsFiltered' => $this->userModel->countFilteredUsers($params['search']),
+        'data'            => $data
+    ]);
+
+    }
+
  public function create()
     {
         return $this->render('Dashboard/User/create');
@@ -167,23 +197,7 @@ class UserController extends BaseController
 
 
   // Soft delete user
-// public function delete()
-// {
-//     $id = (int) $this->request->getPost('id');
 
-//     if (!$id) {
-//         return redirect()->back()->with('error', 'Invalid user ID');
-//     }
-
-//     $deleted = $this->userModel->softDeleteUser($id);
-
-//     if ($deleted) {
-//         return redirect()->to('/user')
-//             ->with('success', 'User deleted successfully (soft delete).');
-//     }
-
-//     return redirect()->back()->with('error', 'Failed to delete user');
-// }
       public function delete()
 {
     if (! $this->request->isAJAX()) {

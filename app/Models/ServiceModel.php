@@ -47,12 +47,39 @@ class ServiceModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-      public function getAll()
-    {
-        return $this->select('id, service_name, price, status')
-                    ->where('deleted_at', null)
-                    ->findAll();
+   public function getServices($limit, $start, $search, $orderColumn, $orderDir)
+{
+    $builder = $this->builder();
+
+    if ($search) {
+        $builder->groupStart()
+            ->like('service_name', $search)
+            ->orLike('price', $search)
+            ->orLike('status', $search)
+        ->groupEnd();
     }
+
+    return $builder
+        ->orderBy($orderColumn, $orderDir)
+        ->limit($limit, $start)
+        ->get()
+        ->getResultArray();
+}
+
+public function countFiltered($search)
+{
+    $builder = $this->builder();
+
+    if ($search) {
+        $builder->groupStart()
+            ->like('service_name', $search)
+            ->orLike('price', $search)
+            ->orLike('status', $search)
+        ->groupEnd();
+    }
+
+    return $builder->countAllResults();
+}
 
 
     public function all()
