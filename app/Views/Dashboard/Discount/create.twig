@@ -1,0 +1,120 @@
+<div class="main-content d-flex flex-column min-vh-100">
+	<div class="container py-5">
+
+		<div class="d-flex justify-content-between align-items-center mb-3">
+			<h5 class="fw-bold mb-0">Create New Discount</h5>
+		</div>
+
+		<div class="card card-custom w-100">
+			<div class="card-body">
+
+				<form
+					id="createDiscountForm">
+					{# CSRF #}
+					<input
+					type="hidden" name="{{ csrf_token() }}" value="{{ csrf_hash() }}">
+
+					{# Discount Type #}
+					<div class="mb-3">
+						<label for="discount_type" class="form-label fw-bold">
+							Discount Type
+						</label>
+						<input type="text" name="discount_type" id="discount_type" class="form-control" placeholder="Enter discount type (e.g. Percentage or Flat)" required>
+					</div>
+
+					{# Discount Name #}
+					<div class="mb-3">
+						<label for="discount_name" class="form-label fw-bold">
+							Discount Name
+						</label>
+						<input type="text" name="discount_name" id="discount_name" class="form-control" placeholder="Enter discount name (e.g. Summer Sale)" required>
+					</div>
+
+					{# Discount Value #}
+					<div class="mb-3">
+						<label for="value" class="form-label fw-bold">
+							Discount Value
+						</label>
+						<input type="number" name="value" id="value" class="form-control" step="0.01" placeholder="Enter discount value" required>
+					</div>
+
+					{# Start Date #}
+					<div class="mb-3">
+						<label for="start_date" class="form-label fw-bold">
+							Start Date
+						</label>
+						<input type="date" name="start_date" id="start_date" class="form-control" required>
+					</div>
+
+					{# End Date #}
+					<div class="mb-3">
+						<label for="end_date" class="form-label fw-bold">
+							End Date
+						</label>
+						<input type="date" name="end_date" id="end_date" class="form-control" required>
+					</div>
+
+					{# Status #}
+					<div class="mb-3">
+						<label for="status" class="form-label fw-bold">
+							Status
+						</label>
+						<select name="status" id="status" class="form-select" required>
+							<option value="">Select Status</option>
+							<option value="Active">Active</option>
+							<option value="Inactive">Inactive</option>
+						</select>
+					</div>
+
+					{# Buttons #}
+					<div class="d-flex gap-2">
+						<button type="submit" id="createDiscountBtn" class="btn btn-success">
+							Save Discount
+						</button>
+
+						<a href="{{ base_url('discount') }}" class="btn btn-secondary btn-sm">
+							← Back to List
+						</a>
+					</div>
+
+				</form>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$(function () {
+       $('#createDiscountForm').on('submit', function (e) {
+       e.preventDefault();
+      const form = $(this);
+    $.ajax({
+        url: "{{ base_url('discount/store') }}",
+        type: "POST",
+        data: form.serialize(),
+        dataType: "json",
+        beforeSend: function () {
+        $('#createDiscountBtn').prop('disabled', true).text('Saving...');
+        },
+        success: function (response) {
+        if (response.status === 'success') {
+        alert(response.message || 'Discount created successfully!');
+        form[0].reset();
+        } else {
+        alert(response.message || 'Failed to create discount!');
+        }
+        },
+        error: function (xhr) {
+        console.error(xhr.responseText);
+        alert('Server error!');
+        },
+        complete: function () {
+        $('#createDiscountBtn').prop('disabled', false).text('Save Discount');
+        }
+        });
+
+        });
+
+        });
+</script>

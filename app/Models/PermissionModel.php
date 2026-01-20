@@ -90,9 +90,9 @@ class PermissionModel extends Model
     /**
      * Delete permission by ID
      */
- public function remove(int $id): bool
+     public function remove(int $id): bool
     {
-        
+
         return (bool) $this->delete($id);
     }
 

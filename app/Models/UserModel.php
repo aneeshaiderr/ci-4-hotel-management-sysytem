@@ -19,9 +19,7 @@ class UserModel extends Model
         'username', 'password', 'created_at', 'updated_at'
     ];
 
-    /**
-     * Get all users with auth_logins info (status + identifier)
-     */
+
      // Get users for DataTable (with search, limit, offset)
     public function getUsers(int $limit, int $offset, string $search = '', string $orderColumn = 'id', string $orderDir = 'ASC'): array
     {
@@ -63,16 +61,6 @@ class UserModel extends Model
 
         return $builder->countAllResults();
     }
-//  public function getAllUsers(): array
-// {
-//     return $this->db->table('users u')
-//         ->select('u.id, u.username, ui.first_name, ui.last_name, ui.email, ui.contact_no')
-//         ->join('user_info ui', 'ui.user_id = u.id', 'left')
-//         ->where('u.deleted_at', null) // Only non-deleted users
-//         ->orderBy('u.id', 'ASC')
-//         ->get()
-//         ->getResultArray();
-// }
 
     /**
      * Create user and save email in user_info table

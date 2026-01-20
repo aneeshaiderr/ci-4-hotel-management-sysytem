@@ -34,18 +34,13 @@ class ReservationController extends BaseController
     /** List all reservations */
     public function index()
     {
-
-
         return $this->render('Dashboard/Reservation/reservation');
     }
- public function DataTable()
+    public function DataTable()
 {
-
-   $dt = new DataTableHelper($this->request);
-
+    $dt = new DataTableHelper($this->request);
     $columns = ['id','hotel_code','email','hotel_name','room_id','discount_name','check_in','check_out','status'];
     $params = $dt->getParams($columns);
-
     $data = $this->reservationModel->getReservations(
         $params['start'],
         $params['length'],
@@ -79,13 +74,12 @@ class ReservationController extends BaseController
 
 
     /** Store reservation */
-public function store()
+    public function store()
 {
     $request = service('request');
     $session = session();
-
     // Validate input
-    $validation = \Config\Services::validation();
+     $validation = \Config\Services::validation();
     $validation->setRules([
         'hotel_code'    => 'required',
         'user_info_id'  => 'required|numeric',
@@ -130,12 +124,10 @@ public function store()
     public function edit($id)
     {
         $reservation = $this->reservationModel->find($id);
-
         if (!$reservation) {
             $this->session->setFlashdata('error', 'Reservation not found.');
             return redirect()->to('/reservation');
         }
-
         return $this->render('Dashboard/Reservation/edit', [
             'reservation' => $reservation,
             'hotels'      => $this->hotelModel->findAll(),

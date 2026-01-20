@@ -1,0 +1,134 @@
+{# Assumptions: controller passes `user` and `userGroups` and `current_uri` #}
+
+<div class="content-wrapper">
+
+	<aside
+		id="sidebar" class="text-white vh-100 p-3">
+		<!-- Sidebar Brand -->
+		<div class="text-center mb-4">
+			<h5 class="fw-bold">Hotel Reservation</h5>
+		</div>
+
+		<!-- User Profile Section -->
+		<div class="text-center mb-3">
+			<img src="{{ base_url('assets_dashboard/img/avatar.jpg') }}" class="rounded-circle img-fluid mb-2" alt="User Avatar" style="width:80px; height:80px;">
+			<div class="mb-0">
+				<small class="text-secondary mb-0">
+					{% if 'super-admin' in userGroups %}
+						Super Admin
+					{% elseif 'staff' in userGroups %}
+						Staff
+					{% elseif 'user' in userGroups %}
+						User
+					{% else %}
+						Guest
+					{% endif %}
+				</small>
+			</div>
+		</div>
+
+		<hr
+		class="border-secondary">
+
+		<!-- Sidebar Navigation -->
+		<ul
+			class="nav flex-column">
+
+			{# Dashboards for super-admin only #}
+			{% if 'super-admin' in userGroups %}
+				<li class="nav-item">
+					<a class="nav-link text-white" data-bs-toggle="collapse" href="#dashboards" role="button" aria-expanded="false" aria-controls="dashboards">
+						<i class="fas fa-sliders-h"></i>
+						Dashboards
+					</a>
+					<div class="collapse" id="dashboards">
+						<ul class="nav flex-column ms-3">
+							<li class="nav-item">
+								<a href="{{ base_url('analytics') }}" class="nav-link text-white {% if current_uri == 'analytics' %}active bg-dark text-white{% endif %}">
+									Analytics
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('setting') }}" class="nav-link text-white {% if current_uri == 'setting' %}active bg-dark text-white{% endif %}">
+									Settings
+								</a>
+							</li>
+						</ul>
+					</div>
+				</li>
+			{% endif %}
+
+			{# Pages Section #}
+			<li class="nav-item">
+				<a class="nav-link text-white" data-bs-toggle="collapse" href="#pages" role="button" aria-expanded="false" aria-controls="pages">
+					<i class="fas fa-th-large"></i>
+					Pages
+				</a>
+				<div class="collapse" id="pages">
+					<ul class="nav flex-column ms-3">
+
+						{% if 'super-admin' in userGroups %}
+							<li class="nav-item">
+								<a href="{{ base_url('user') }}" class="nav-link text-white {% if current_uri == 'user' %}active bg-dark text-white{% endif %}">Users</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('hotel') }}" class="nav-link text-white {% if current_uri == 'hotel' %}active bg-dark text-white{% endif %}">Hotels</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('rooms') }}" class="nav-link text-white {% if current_uri == 'rooms' %}active bg-dark text-white{% endif %}">Rooms</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('services') }}" class="nav-link text-white {% if current_uri == 'services' %}active bg-dark text-white{% endif %}">Services</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('discount') }}" class="nav-link text-white {% if current_uri == 'discount' %}active bg-dark text-white{% endif %}">Discounts</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('reservation') }}" class="nav-link text-white {% if current_uri == 'reservation' %}active bg-dark text-white{% endif %}">Reservations</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('payment') }}" class="nav-link text-white {% if current_uri == 'payment' %}active bg-dark text-white{% endif %}">Payments</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('permission') }}" class="nav-link text-white {% if current_uri == 'permission' %}active bg-dark text-white{% endif %}">Permissions</a>
+							</li>
+
+						{% elseif 'staff' in userGroups %}
+							<li class="nav-item">
+								<a href="{{ base_url('user') }}" class="nav-link text-white {% if current_uri == 'user' %}active bg-dark text-white{% endif %}">Users</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('reservation') }}" class="nav-link text-white {% if current_uri == 'reservation' %}active bg-dark text-white{% endif %}">Reservations</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('services') }}" class="nav-link text-white {% if current_uri == 'services' %}active bg-dark text-white{% endif %}">Services</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('rooms') }}" class="nav-link text-white {% if current_uri == 'rooms' %}active bg-dark text-white{% endif %}">Rooms</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('discount') }}" class="nav-link text-white {% if current_uri == 'discount' %}active bg-dark text-white{% endif %}">Discounts</a>
+							</li>
+
+						{% elseif 'user' in userGroups %}
+							<li class="nav-item">
+								<a href="{{ base_url('user') }}" class="nav-link text-white {% if current_uri == 'user' %}active bg-dark text-white{% endif %}">My Profile</a>
+							</li>
+							<li class="nav-item">
+								<a href="{{ base_url('reservation') }}" class="nav-link text-white {% if current_uri == 'reservation' %}active bg-dark text-white{% endif %}">My Reservations</a>
+							</li>
+
+						{% else %}
+							<li class="nav-item">
+								<a href="{{ base_url('login') }}" class="nav-link text-white">Login</a>
+							</li>
+						{% endif %}
+
+					</ul>
+				</div>
+			</li>
+
+		</ul>
+	</aside>
+
+</div>

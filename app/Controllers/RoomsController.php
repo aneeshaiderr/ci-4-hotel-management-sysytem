@@ -39,13 +39,13 @@ class RoomsController extends BaseController
     ]);
 }
 
- public function DataTable()
+    public function DataTable()
 {
-    $dt = new DataTableHelper($this->request);
+        $dt = new DataTableHelper($this->request);
 
-    $columns = ['id','room_number','floor','beds','max_guests','status'];
+        $columns = ['id','room_number','floor','beds','max_guests','status'];
 
-    $params = $dt->getParams($columns);
+        $params = $dt->getParams($columns);
 
     $data = $this->roomModel->getRooms(
         $params['length'],
@@ -55,7 +55,7 @@ class RoomsController extends BaseController
         $params['orderDir']
     );
 
-    return $this->response->setJSON([
+        return $this->response->setJSON([
         'draw'            => $params['draw'],
         'recordsTotal'    => $this->roomModel->countAllRooms(),
         'recordsFiltered' => $this->roomModel->countFilteredRooms($params['search']),
@@ -78,18 +78,16 @@ class RoomsController extends BaseController
     /**
      * Store new room
      */
-   public function store()
+    public function store()
 {
-
-
- if (!$this->request->isAJAX()) {
+        if (!$this->request->isAJAX()) {
         return $this->response->setJSON([
             'status' => 'error',
             'message' => 'Invalid request'
         ]);
     }
     // Get POST data
-    $data = [
+         $data = [
         'room_number' => $this->request->getPost('room_number'),
         'floor'       => $this->request->getPost('floor'),
         'beds'        => $this->request->getPost('beds'),
@@ -97,7 +95,7 @@ class RoomsController extends BaseController
         'hotel_id'    => $this->request->getPost('hotel_id'),
         'status'      => $this->request->getPost('status'),
     ];
- if (!$data['hotel_id']) {
+        if (!$data['hotel_id']) {
         return $this->response->setJSON([
             'status' => 'error',
             'message' => 'Please select hotel'
@@ -118,7 +116,7 @@ class RoomsController extends BaseController
         $this->session->setFlashdata('error', 'Something went wrong: ' . $e->getMessage());
     }
 
-    return redirect()->to(base_url('rooms'));
+     return redirect()->to(base_url('rooms'));
 }
     /**
      * Show room details
@@ -165,15 +163,15 @@ class RoomsController extends BaseController
      public function update()
 {
 
-    $id = $this->request->getPost('id');
-    if (!$id) {
+        $id = $this->request->getPost('id');
+        if (!$id) {
         return $this->response->setJSON([
             'status' => 'error',
             'message' => 'Room ID is required'
         ]);
     }
 
-    $data = [
+        $data = [
         'room_number' => $this->request->getPost('room_number'),
         'floor'       => $this->request->getPost('floor'),
         'beds'        => $this->request->getPost('beds'),
@@ -181,14 +179,14 @@ class RoomsController extends BaseController
         'status'      => $this->request->getPost('status'),
     ];
 
-    if ($this->roomModel->update($id, $data)) {
+        if ($this->roomModel->update($id, $data)) {
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Room updated successfully'
         ]);
     }
 
-    return $this->response->setJSON([
+        return $this->response->setJSON([
         'status'  => 'error',
         'message' => 'DB update failed'
     ]);
@@ -198,16 +196,16 @@ class RoomsController extends BaseController
      */
     public function delete()
 {
-    if (! $this->request->isAJAX()) {
+        if (! $this->request->isAJAX()) {
         return $this->response->setJSON([
             'status' => 'error',
             'message' => 'Invalid request'
         ]);
     }
 
-    $id = $this->request->getPost('id');
+        $id = $this->request->getPost('id');
 
-    if (! $id) {
+        if (! $id) {
         return $this->response->setJSON([
             'status' => 'error',
             'message' => 'room ID missing'

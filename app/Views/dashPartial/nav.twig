@@ -1,4 +1,3 @@
-
 <div class="overlay"></div>
 <div class="main-container">
   <nav class="navbar navbar-expand navbar-light">
@@ -23,17 +22,17 @@
       <!-- Language Dropdown -->
       <li class="nav-item dropdown me-2">
         <a class="nav-flag dropdown-toggle" href="#" id="languageDropdown" data-bs-toggle="dropdown">
-          <img src="<?= base_url('assets_dashboard/img/flag/us.png') ?>" alt="English">
+          <img src="{{ base_url('assets_dashboard/img/flag/us.png') }}" alt="English">
         </a>
         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
           <a class="dropdown-item" href="#">
-            <img src="<?= base_url('assets_dashboardimg/flag/de.png') ?>" class="align-middle me-1"> English
+            <img src="{{ base_url('assets_dashboard/img/flag/de.png') }}" class="align-middle me-1"> English
           </a>
           <a class="dropdown-item" href="#">
-            <img src="<?= base_url('assets_dashboard/img/flag/es.png') ?>" class="align-middle me-1"> Spanish
+            <img src="{{ base_url('assets_dashboard/img/flag/es.png') }}" class="align-middle me-1"> Spanish
           </a>
           <a class="dropdown-item" href="#">
-            <img src="<?= base_url('assets_dashboard/img/flag/ru.png') ?>" class="align-middle me-1"> Russian
+            <img src="{{ base_url('assets_dashboard/img/flag/ru.png') }}" class="align-middle me-1"> Russian
           </a>
         </div>
       </li>
@@ -46,20 +45,23 @@
       <!-- User Dropdown -->
       <li class="nav-item dropdown">
         <a class="nav-icon pe-md-0 dropdown-toggle" href="#" data-bs-toggle="dropdown">
-          <img src="<?= base_url('assets_dashboard/img/avatar-3.jpg') ?>" class="avatar img-fluid rounded" alt="User">
+          <img src="{{ base_url('assets_dashboard/img/avatar-3.jpg') }}" class="avatar img-fluid rounded" alt="User">
         </a>
         <div class="dropdown-menu dropdown-menu-end">
-          <?php if(isset($user)): ?>
 
+          {% if user is defined %}
+            <a class="dropdown-item" href="#">
               <i class="fas fa-user me-2"></i> Profile
             </a>
-          <?php endif; ?>
+          {% endif %}
+
           <a class="dropdown-item" href="#"><i class="fas fa-chart-pie me-2"></i> Analytics</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings & Privacy</a>
           <a class="dropdown-item" href="#"><i class="fas fa-question-circle me-2"></i> Help Center</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="<?= base_url('logout') ?>"><i class="fas fa-sign-out-alt me-2"></i> Log out</a>
+          <a class="dropdown-item" href="{{ base_url('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Log out</a>
+
         </div>
       </li>
 

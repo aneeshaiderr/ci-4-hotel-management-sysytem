@@ -15,23 +15,19 @@ class UserController extends BaseController
     public function __construct()
     {
         $this->userModel = new UserModel();
+
     }
 
     public function index()
     {
-
         $user = auth()->user();
-//  $users = $this->userModel->getAllUsers();
-        // Load view
          return $this->render('Dashboard/User/index');
-
         if ($user->inGroup('staff'))
              {
             $this->render('dashboard/staff/staff', [
                 'users' => $this->userModel->findAll(),
             ]);
         }
-
         // Normal user
        $this->render('dashboard/user/user', [
             'user'               => $user,
@@ -39,18 +35,12 @@ class UserController extends BaseController
                 ->getCurrentReservation($user->id),
         ]);
     }
-
-
    public function datatable()
     {
         $dt = new DataTableHelper($this->request);
-
-
-
         $columns = ['username','first_name','last_name','email'];
         $params = $dt->getParams($columns);
-
-    $data =$this->userModel->getUsers(
+        $data =$this->userModel->getUsers(
         $params['length'],
         $params['start'],
         $params['search'],
@@ -67,7 +57,7 @@ class UserController extends BaseController
 
     }
 
- public function create()
+    public function create()
     {
         return $this->render('Dashboard/User/create');
     }
@@ -98,7 +88,7 @@ class UserController extends BaseController
     }
 
     // Prepare data
-    $data = [
+       $data = [
         'username'   => $this->request->getPost('username'),
         'first_name' => $this->request->getPost('first_name'),
         'last_name'  => $this->request->getPost('last_name'),
@@ -138,11 +128,11 @@ class UserController extends BaseController
     /**
      * Update user info
      */
-  public function update()
+     public function update()
 {
-    $validation = Services::validation();
+     $validation = Services::validation();
 
-    $validation->setRules([
+     $validation->setRules([
         'username'   => 'required|min_length[3]',
         'first_name' => 'required',
         'last_name'  => 'required',
@@ -215,9 +205,6 @@ class UserController extends BaseController
             'message' => 'user ID missing'
         ]);
     }
-
-
-
     if ( $this->userModel->softDeleteUser($id)) {
         return $this->response->setJSON([
             'status' => 'success',

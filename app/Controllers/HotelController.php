@@ -10,25 +10,21 @@ class HotelController extends BaseController
     protected $hotelModel;
       public function __construct()
     {
-
          $this->hotelModel = model(HotelModel::class);
         $this->session    = Services::session();
     }
 
    public function index()
     {
-
-
-        return $this->render('Dashboard/Hotel/hotel');
+        $this->render('Dashboard/Hotel/hotel');
     }
-public function DataTable()
+    public function DataTable()
 {
-   $dt = new DataTableHelper($this->request);
+     $dt = new DataTableHelper($this->request);
 
-    $columns = ['id','hotel_name','address','contact_no'];
-  $params = $dt->getParams($columns);
-
-    $data = $this->hotelModel->getHotels(
+      $columns = ['id','hotel_name','address','contact_no'];
+       $params = $dt->getParams($columns);
+        $data = $this->hotelModel->getHotels(
         $params['length'],
         $params['start'],
         $params['search'],
@@ -36,7 +32,7 @@ public function DataTable()
         $params['orderDir']
     );
 
- return $this->response->setJSON([
+         return $this->response->setJSON([
         'draw'            => $params['draw'],
         'recordsTotal'    => $this->hotelModel->countAllHotels(),
         'recordsFiltered' => $this->hotelModel->countFilteredHotels($params['search']),
@@ -56,7 +52,7 @@ public function DataTable()
     /**
      * Store new hotel
      */
-public function store()
+    public function store()
 {
     $request = Services::request();
     $session = Services::session();
@@ -67,7 +63,6 @@ public function store()
             'message' => 'Invalid request method'
         ]);
     }
-
     $data = [
         'hotel_name' => $request->getPost('hotel_name'),
         'address'    => $request->getPost('address'),
@@ -121,11 +116,10 @@ public function store()
     /**
      * Update existing hotel
      */
-   public function update()
+    public function update()
 {
-    $request = Services::request();
-
-    if (!$request->isAJAX() || $request->getMethod() == 'post') {
+     $request = Services::request();
+     if (!$request->isAJAX() || $request->getMethod() == 'post') {
         return $this->response->setJSON([
             'status' => 'error',
             'message' => 'Invalid request method'

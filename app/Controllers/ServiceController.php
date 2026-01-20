@@ -17,8 +17,6 @@ class ServiceController extends BaseController
         $this->request   = Services::request();
 
     }
-
-
     public function index()
     {
 
@@ -46,7 +44,7 @@ public function DataTable()
         $params['orderDir']
     );
 
-  return $this->response->setJSON([
+      return $this->response->setJSON([
         'draw'            => $params['draw'],
         'recordsTotal'    => $this->serviceModel->countAll(),
         'recordsFiltered' => $this->serviceModel->countFiltered($params['search']),
@@ -64,10 +62,7 @@ public function DataTable()
    public function store()
     {
         $request = Services::request();
-
-
-
- if ($request->getMethod() == 'post') {
+        if ($request->getMethod() == 'post') {
         return $this->response->setJSON([
             'status' => 'error',
             'message' => 'Invalid request method'
@@ -93,9 +88,7 @@ public function DataTable()
             ]);
         }
     }
-
-
-    public function edit($id = null)
+        public function edit($id = null)
     {
         if (! $id) {
             return redirect()->to('/services');
@@ -113,15 +106,15 @@ public function DataTable()
         ]);
     }
 
-   public function update()
+       public function update()
 {
-    $request = Services::request();
-    if ($request->getMethod() == 'post') {
+        $request = Services::request();
+        if ($request->getMethod() == 'post') {
         return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request method']);
     }
 
-    $id = $request->getPost('id');
-    $data = [
+        $id = $request->getPost('id');
+        $data = [
         'service_name' => $request->getPost('service_name'),
         'price' => $request->getPost('price'),
         'status' => $request->getPost('status'),
@@ -134,20 +127,17 @@ public function DataTable()
         return $this->response->setJSON(['status' => 'error', 'message' => 'Something went wrong!']);
     }
 }
-
-
-  public function delete()
+        public function delete()
 {
-    if (! $this->request->isAJAX()) {
-        return $this->response->setJSON([
+        if (! $this->request->isAJAX()) {
+            return $this->response->setJSON([
             'status' => 'error',
             'message' => 'Invalid request'
         ]);
     }
 
-    $id = $this->request->getPost('id');
-
-    if (! $id) {
+        $id = $this->request->getPost('id');
+        if (! $id) {
         return $this->response->setJSON([
             'status' => 'error',
             'message' => 'Service ID missing'
@@ -156,7 +146,7 @@ public function DataTable()
 
 
 
-    if ($this->serviceModel->delete($id)) {
+         if ($this->serviceModel->delete($id)) {
         return $this->response->setJSON([
             'status' => 'success',
             'message' => 'Service deleted successfully'

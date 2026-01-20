@@ -4,6 +4,10 @@ namespace Config;
 
 use CodeIgniter\Config\BaseService;
 
+use Twig\Loader\FilesystemLoader;
+use Twig\Environment;
+use Twig\TwigFunction;
+
 /**
  * Services Configuration file.
  *
@@ -19,14 +23,57 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
-     *
-     *     return new \CodeIgniter\Example();
-     * }
-     */
+    protected $twig;
+
+      public static function twig($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('twig');
+        }
+
+        // Twig loader pointing to app/Views
+        $loader = new FilesystemLoader(APPPATH . 'Views');
+
+
+        $twig = new Environment($loader, [
+            'cache' => WRITEPATH . 'cache/twig',
+            'debug' => true,
+        ]);
+
+   // Shield auth
+      $auth = auth();
+      $twig->addGlobal('user', $auth->user());
+      $twig->addGlobal(
+    'userPermissions',
+    $auth->user() ? $auth->user()->getPermissions() : []
+);
+
+    $twig->addGlobal('user', $auth->user());
+    $twig->addGlobal('userGroups', $auth->user() ? $auth->user()->getGroups() : []);
+    $twig->addGlobal('current_uri', service('uri')->getSegment(1));
+
+        $twig->addExtension(new \Twig\Extension\DebugExtension());
+
+        // base_url()
+        $twig->addFunction(new TwigFunction('base_url', function($uri = '') {
+            return base_url($uri);
+        }));
+
+        // csrf_token()
+        $twig->addFunction(new TwigFunction('csrf_token', function() {
+            return csrf_token();
+        }));
+
+        // csrf_hash()
+        $twig->addFunction(new TwigFunction('csrf_hash', function() {
+            return csrf_hash();
+        }));
+
+        return $twig;
+
+    }
+   public function render(string $view, array $data = []): string
+    {
+        return $this->twig->render($view . '.twig', $data);
+    }
 }

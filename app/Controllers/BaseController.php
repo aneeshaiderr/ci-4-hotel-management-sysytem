@@ -20,6 +20,8 @@ use Psr\Log\LoggerInterface;
  */
 abstract class BaseController extends Controller
 {
+    protected $twig;
+        //  protected $twigData = [];
     /**
      * Be sure to declare properties for any property fetch you initialized.
      * The creation of dynamic property is deprecated in PHP 8.2.
@@ -32,6 +34,8 @@ abstract class BaseController extends Controller
      */
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
+
+
         $this->helpers = array_merge($this->helpers,['setting']);
         // Load here all helpers you want to be available in your controllers that extend BaseController.
         // Caution: Do not put the this below the parent::initController() call below.
@@ -43,9 +47,18 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
     }
-     protected function render(string $view, array $data = [])
-    {
-        $data['content'] = $view;
-        echo view('layout/dashboard', $data);
-    }
+
+    protected function render(string $view, array $data = [])
+{
+    $twig = \Config\Services::twig();
+
+    // content twig file
+    $data['content'] = $view . '.twig';
+
+    echo $twig->render('layout/dashboard.twig', $data);
+    exit;
+}
+
+
+
 }

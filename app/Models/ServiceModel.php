@@ -80,14 +80,10 @@ public function countFiltered($search)
 
     return $builder->countAllResults();
 }
-
-
     public function all()
     {
         return $this->getAll();
     }
-
-
     public function getAllServicesList()
     {
         return $this->select('id, service_name, price, status')
@@ -95,8 +91,6 @@ public function countFiltered($search)
                     ->orderBy('id')
                     ->findAll();
     }
-
-
     public function createService(array $data)
     {
         return $this->insert([
@@ -123,20 +117,12 @@ public function countFiltered($search)
             'status'       => $data['status'],
         ]);
     }
-
-
-    // public function softDeleteService($id)
-    // {
-    //     return $this->delete($id);
-    // }
-
-public function softDeleteService($id)
-{
-    return $this->update($id, [
-        'deleted_at' => date('Y-m-d H:i:s')
-    ]);
+        public function softDeleteService($id)
+    {
+        return $this->update($id, [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
 }
-
     public function getAllServices()
     {
         return $this->orderBy('created_at', 'ASC')

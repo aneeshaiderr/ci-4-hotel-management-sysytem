@@ -1,0 +1,107 @@
+{% block content %}
+<div class="main-content d-flex flex-column min-vh-100">
+    <div class="container py-5">
+        <main>
+            <div class="mx-auto max-w-4xl py-7 px-7">
+                <h5 class="fw-bold mb-4">Edit Service</h5>
+
+                <form id="editServiceForm" method="POST">
+                    {# CSRF Token #}
+                    <input type="hidden" name="{{ csrf_token() }}" value="{{ csrf_hash() }}">
+
+                    {# Hidden Service ID #}
+                    <input type="hidden" name="id" value="{{ service.id }}">
+
+                    <!-- Service Name -->
+                    <div class="mb-4">
+                        <label for="service_name" class="form-label fw-bold">Service Name</label>
+                        <input
+                            type="text"
+                            name="service_name"
+                            id="service_name"
+                            class="form-control"
+                            placeholder="Enter service name"
+                            required
+                            value="{{ service.service_name }}"
+                        >
+                    </div>
+
+                    <!-- Price -->
+                    <div class="mb-4">
+                        <label for="price" class="form-label fw-bold">Price</label>
+                        <input
+                            type="number"
+                            name="price"
+                            id="price"
+                            class="form-control"
+                            step="0.01"
+                            placeholder="Enter price"
+                            required
+                            value="{{ service.price }}"
+                        >
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-4">
+                        <label for="status" class="form-label fw-bold">Status</label>
+                        <select name="status" id="status" class="form-select" required>
+                            <option value="">Select Status</option>
+                            <option value="active" {% if service.status|lower == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if service.status|lower == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-end gap-3">
+                        <a href="{{ base_url('services') }}" class="btn btn-secondary">Back</a>
+                        <button type="submit" id="updateServiceBtn" class="btn btn-success"
+                                style="background-color:#16a34a;"
+                                onmouseover="this.style.backgroundColor='#15803d'"
+                                onmouseout="this.style.backgroundColor='#16a34a'">
+                            Update Service
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+$(function() {
+
+    $('#editServiceForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+
+        $.ajax({
+            url: "{{ base_url('services/update') }}",
+            type: "POST",
+            data: form.serialize(),
+            dataType: "json",
+            beforeSend: function() {
+                $('#updateServiceBtn').prop('disabled', true).text('Updating...');
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    alert(response.message || 'Service updated successfully!');
+                    window.location.href = "{{ base_url('services') }}";
+                } else {
+                    alert(response.message || 'Update failed!');
+                }
+            },
+            error: function(xhr) {
+                alert('Server error!');
+                console.error(xhr.responseText);
+            },
+            complete: function() {
+                $('#updateServiceBtn').prop('disabled', false).text('Update Service');
+            }
+        });
+    });
+
+});
+</script>
+{% endblock %}

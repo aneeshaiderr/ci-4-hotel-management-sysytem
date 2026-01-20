@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		{# Include head partial #}
+		{% include 'dashPartial/head.twig' %}
+	</head>
+
+	<body>
+
+		{# Include navbar partial #}
+		{% include 'dashPartial/nav.twig' %}
+
+		{# Include sidebar partial #}
+		{% include 'dashPartial/sidebar.twig' %}
+
+		<main class="d-flex flex-column min-vh-100">
+			{% if content is defined %}
+				{% include content %}
+			{% endif %}
+		</main>
+
+		{# Include footer partial #}
+		{% include 'dashPartial/footer.twig' %}
+
+	</body>
+</html>

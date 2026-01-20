@@ -1,0 +1,43 @@
+<div class="main-content d-flex flex-column min-vh-100">
+	<div class="container py-5">
+
+		<h5 class="fw-bold mb-4">Assign Permission to User</h5>
+
+		<form
+			action="{{ base_url('permission/store') }}" method="post">
+
+			{# CSRF Protection #}
+			<input
+			type="hidden" name="{{ csrf_token() }}" value="{{ csrf_hash() }}">
+
+			{# User ID Dropdown #}
+			<div class="mb-3">
+				<label class="form-label">Select User ID</label>
+
+				<select name="user_id" class="form-control" required>
+					<option value="">-- Select User --</option>
+
+					{% for user in users %}
+						<option value="{{ user.user_id|e }}">
+							User ID:
+							{{ user.user_id|e }}
+						</option>
+					{% endfor %}
+				</select>
+			</div>
+
+			{# Permission Text #}
+			<div class="mb-3">
+				<label class="form-label">Permission</label>
+
+				<input type="text" name="permission" class="form-control" placeholder="e.g. discount.add, discount.delete" required>
+			</div>
+
+			<button type="submit" class="btn btn-primary">
+				Assign Permission
+			</button>
+
+		</form>
+
+	</div>
+</div>

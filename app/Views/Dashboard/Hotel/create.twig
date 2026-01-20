@@ -1,0 +1,78 @@
+
+
+{% block content %}
+<div class="main-content d-flex flex-column min-vh-100">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">Create New Hotel</h5>
+        </div>
+
+        <div class="card card-custom w-100">
+            <div class="card-body">
+
+                <!-- Form -->
+                <form id="createHotelForm">
+                    {# CSRF Token #}
+                    <input type="hidden" name="{{ csrf_token() }}" value="{{ csrf_hash() }}">
+
+                    <div class="mb-3">
+                        <label for="hotel_name" class="form-label fw-bold">Hotel Name</label>
+                        <input type="text" name="hotel_name" id="hotel_name" class="form-control"
+                               placeholder="Enter hotel name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label fw-bold">Address</label>
+                        <input type="text" name="address" id="address" class="form-control"
+                               placeholder="Enter address" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contact_no" class="form-label fw-bold">Contact Number</label>
+                        <input type="text" name="contact_no" id="contact_no" class="form-control"
+                               placeholder="Enter contact number" required>
+                    </div>
+
+                    <button type="submit" id="saveHotelBtn" class="btn btn-success">Save Hotel</button>
+                    <a href="{{ base_url('hotel') }}" class="btn btn-secondary btn-sm">← Back to List</a>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function () {
+    $('#createHotelForm').on('submit', function (e) {
+        e.preventDefault();
+        var form = $(this);
+
+        $.ajax({
+            url: "{{ base_url('hotel/store') }}",
+            type: "POST",
+            data: form.serialize(),
+            dataType: "json",
+            beforeSend: function () {
+                $('#saveHotelBtn').prop('disabled', true).text('Saving...');
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    alert(response.message);
+                    form[0].reset();
+                } else {
+                    alert(response.message || 'Failed to save hotel');
+                }
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+                alert('Server error!');
+            },
+            complete: function () {
+                $('#saveHotelBtn').prop('disabled', false).text('Save Hotel');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

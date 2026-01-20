@@ -24,13 +24,11 @@ class DiscountController extends BaseController
      */
     public function index()
     {
-
         return $this->render('Dashboard/Discount/discount');
     }
-public function datatable()
+    public function datatable()
 {
     $dt = new DataTableHelper($this->request);
-
     $columns = [
         'id',
         'discount_type',

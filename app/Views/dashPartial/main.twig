@@ -1,7 +1,7 @@
 <script>
 $(document).ready(function() {
 
-    $('.delete-form').on('submit',  function(e) {
+    $('.delete-form').on('submit', function(e) {
         e.preventDefault();
 
         var form = $(this);
@@ -12,7 +12,7 @@ $(document).ready(function() {
         }
 
         $.ajax({
-            url: form.attr('action'),
+            url: form.attr('action'), // action URL dynamically Twig se pass ho sakta hai
             type: "POST",
             data: form.serialize(),
 
